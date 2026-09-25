@@ -20,8 +20,23 @@ async def lifespan(app: FastAPI):
     disconnect()
 
 
+def init_error_tracking(dsn: str | None, environment: str) -> None:
+    if not dsn:
+        return
+    import sentry_sdk
+
+    sentry_sdk.init(
+        dsn=dsn,
+        environment=environment,
+        # Don't send members' personal details (emails, IPs, request bodies) to Sentry.
+        send_default_pii=False,
+        traces_sample_rate=0,
+    )
+
+
 def create_app() -> FastAPI:
     settings = get_settings()
+    init_error_tracking(settings.sentry_dsn, settings.environment)
     app = FastAPI(title="EasyHand API", version="0.1.0", lifespan=lifespan)
 
     origins = settings.cors_origin_list

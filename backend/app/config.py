@@ -34,6 +34,10 @@ class Settings(BaseSettings):
     resend_api_key: str | None = None
     email_from: str = "EasyHand <onboarding@resend.dev>"
 
+    # Error tracking via Sentry (https://sentry.io). Off unless a DSN is set.
+    sentry_dsn: str | None = None
+    environment: str = "development"
+
     cloudinary_cloud_name: str | None = None
     cloudinary_api_key: str | None = None
     cloudinary_api_secret: str | None = None

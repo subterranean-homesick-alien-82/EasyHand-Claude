@@ -17,6 +17,7 @@ everything marked 📝.
 | Vercel (Hobby) | Hosts the website | Free |
 | Resend | Sends email | Free up to 3,000 emails / month |
 | Cloudinary | Stores listing photos (optional) | Free tier |
+| Sentry | Emails you when the backend crashes (optional) | Free tier |
 
 **About Render:** the free plan "falls asleep" after 15 minutes without visitors, and the next person
 waits about a minute for the page to work. That will look broken to members, especially older ones,
@@ -62,6 +63,14 @@ for a free pilot. Move to Pro ($20/month) once EasyHand makes money.
 
 Without these, everything works except adding a photo to a listing.
 
+## 3b. Crash alerts: Sentry (optional, recommended)
+
+1. Sign up at **sentry.io**, create a project and choose **FastAPI** as the platform.
+2. Copy the **DSN** 📝 (a web address starting with `https://`). This is your **`SENTRY_DSN`**.
+
+Sentry emails you when something breaks on the server, so you hear about problems before members do.
+EasyHand is set up not to send members' personal details to Sentry.
+
 ## 4. Backend: Render
 
 1. Sign up at **render.com** with your GitHub account.
@@ -76,6 +85,7 @@ Without these, everything works except adding a photo to a listing.
    | `CORS_ORIGINS` | the same as `APP_URL` for now (step 6 adds the Vercel address) |
    | `RESEND_API_KEY`, `EMAIL_FROM` | from step 2 |
    | `CLOUDINARY_*` | from step 3, or leave empty |
+   | `SENTRY_DSN` | from step 3b, or leave empty |
 
    `SECRET_KEY` is created automatically. Don't share it.
 4. Create it and wait for the deploy to finish (a few minutes). Copy the service address 📝,

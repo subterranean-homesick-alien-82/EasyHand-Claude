@@ -44,3 +44,17 @@ async def test_update_and_view_profile(client, register):
 
     assert (await client.get("/users/000000000000000000000000")).status_code == 404
     assert (await client.get("/users/not-an-id")).status_code == 404
+
+
+def test_error_tracking_starts_only_with_a_dsn(monkeypatch):
+    import sentry_sdk
+
+    from app.main import init_error_tracking
+
+    calls = []
+    monkeypatch.setattr(sentry_sdk, "init", lambda **kwargs: calls.append(kwargs))
+    init_error_tracking(None, "test")
+    assert calls == []
+    init_error_tracking("https://key@o0.ingest.sentry.io/0", "production")
+    assert calls[0]["environment"] == "production"
+    assert calls[0]["send_default_pii"] is False

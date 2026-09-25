@@ -28,6 +28,10 @@ services:
         sync: false
       - key: EMAIL_FROM
         sync: false
+      - key: SENTRY_DSN
+        sync: false
+      - key: ENVIRONMENT
+        value: production
       - key: CLOUDINARY_CLOUD_NAME
         sync: false
       - key: CLOUDINARY_API_KEY
