@@ -14,7 +14,7 @@ async def test_register_login_and_me(client, register):
 async def test_duplicate_email_rejected(client, register):
     await register("dup@example.com")
     res = await client.post(
-        "/auth/register", json={"email": "DUP@example.com", "password": "password123", "name": "Other"}
+        "/auth/register", json={"email": "DUP@example.com", "password": "password123", "name": "Other", "accepted_terms": True}
     )
     assert res.status_code == 409
 

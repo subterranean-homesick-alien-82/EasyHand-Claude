@@ -1,9 +1,21 @@
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from app.config import Settings
+from app.config import Settings, get_settings
 from app.db import connect, disconnect, ensure_indexes
 from app.main import create_app
+from app.ratelimit import limiter
+
+ADMIN_EMAIL = "admin@example.com"
+
+
+@pytest.fixture(autouse=True)
+def _settings(monkeypatch):
+    monkeypatch.setenv("ADMIN_EMAILS", ADMIN_EMAIL)
+    get_settings.cache_clear()
+    limiter.reset()
+    yield
+    get_settings.cache_clear()
 
 
 @pytest.fixture
@@ -21,7 +33,7 @@ def register(client):
     async def _register(email: str, name: str = "Test User", neighborhood: str = "Midtown", password: str = "password123"):
         res = await client.post(
             "/auth/register",
-            json={"email": email, "password": password, "name": name, "neighborhood": neighborhood},
+            json={"email": email, "password": password, "name": name, "neighborhood": neighborhood, "accepted_terms": True},
         )
         assert res.status_code == 201, res.text
         data = res.json()

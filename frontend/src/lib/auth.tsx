@@ -9,9 +9,11 @@ interface AuthContextValue {
   user: PrivateUser | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (data: { email: string; password: string; name: string; neighborhood: string }) => Promise<void>;
+  signUp: (data: { email: string; password: string; name: string; neighborhood: string; accepted_terms: boolean }) => Promise<void>;
   signOut: () => Promise<void>;
   updateProfile: (data: ProfileUpdate) => Promise<void>;
+  /** Replace the cached user after an API call that returns the updated account (e.g. block/unblock). */
+  setUser: (user: PrivateUser) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -61,6 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signUp: (data) => handleAuth(api.register(data)),
       signOut,
       updateProfile: async (data) => setUser(await api.updateProfile(data)),
+      setUser,
     }),
     [user, loading, handleAuth, signOut],
   );

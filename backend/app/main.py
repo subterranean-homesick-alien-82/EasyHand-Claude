@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .config import DEV_SECRET_KEY, get_settings
 from .db import connect, disconnect, ensure_indexes
-from .routers import auth, messages, posts, uploads, users
+from .routers import admin, auth, messages, posts, reports, uploads, users
 
 
 @asynccontextmanager
@@ -34,7 +34,7 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    for router in (auth.router, users.router, posts.router, messages.router, uploads.router):
+    for router in (auth.router, users.router, posts.router, messages.router, reports.router, admin.router, uploads.router):
         app.include_router(router)
 
     @app.get("/health", tags=["meta"])

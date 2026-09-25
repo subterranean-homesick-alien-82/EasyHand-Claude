@@ -1,9 +1,15 @@
 const { chromium } = require('playwright');
 // Browser test of the core loop against a running API + web build. See README "Testing".
-// Env: WEB_URL (default http://localhost:8081), SHOTS (dir for screenshots, optional),
+// Env: WEB_URL (default http://localhost:8081), API_URL (default http://localhost:8000),
+//      ADMIN_EMAIL / ADMIN_PASSWORD (must be in the API's ADMIN_EMAILS; default admin@example.com),
+//      SHOTS (dir for screenshots, optional),
 //      CHROMIUM_PATH (optional executable path).
 const SHOTS = process.env.SHOTS;
 const BASE = process.env.WEB_URL || 'http://localhost:8081';
+const API = process.env.API_URL || 'http://localhost:8000';
+// Must be listed in the API's ADMIN_EMAILS.
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@example.com';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'password123';
 const stamp = Date.now();
 const TITLE = `Front yard needs mowing this weekend #${stamp % 100000}`;
 
@@ -33,6 +39,7 @@ const TITLE = `Front yard needs mowing this weekend #${stamp % 100000}`;
   await maria.getByLabel('Neighborhood').fill('Midtown');
   await maria.getByLabel('Email').fill(`maria${stamp}@example.com`);
   await maria.getByLabel('Password').fill('password123');
+  await maria.getByRole('checkbox').click();
   await shot(maria, '01-register');
   await maria.getByRole('button', { name: 'Create account' }).click();
   await maria.getByText('Community Board').waitFor();
@@ -44,6 +51,7 @@ const TITLE = `Front yard needs mowing this weekend #${stamp % 100000}`;
   await shot(maria, '02-new-post');
   await maria.getByRole('button', { name: 'Post it' }).click();
   await maria.getByText('Manage your listing').waitFor();
+  const postUrl = maria.url();
   await shot(maria, '03-post-detail-owner');
 
   // 2. Jay registers, fills in profile, finds the listing and messages Maria
@@ -53,6 +61,7 @@ const TITLE = `Front yard needs mowing this weekend #${stamp % 100000}`;
   await jay.getByLabel('Neighborhood').fill('Midtown');
   await jay.getByLabel('Email').fill(`jay${stamp}@example.com`);
   await jay.getByLabel('Password').fill('password123');
+  await jay.getByRole('checkbox').click();
   await jay.getByRole('button', { name: 'Create account' }).click();
   await jay.getByText('Community Board').waitFor();
   await jay.getByText('Profile', { exact: true }).click();
@@ -91,6 +100,47 @@ const TITLE = `Front yard needs mowing this weekend #${stamp % 100000}`;
   // Jay's open chat picks up the reply via polling
   await jay.getByText('see you Saturday').last().waitFor({ timeout: 10000 });
   await shot(jay, '08-chat-reply');
+
+  // 4. Jay reports the listing, and a moderator hides it
+  await jay.goto(postUrl);
+  await jay.getByText('Report this listing').click();
+  await jay.getByRole('radio', { name: 'Looks like a scam' }).click();
+  await jay.getByLabel('Anything else we should know? (optional)').fill('Asked me to pay with gift cards first.');
+  await shot(jay, '09-report');
+  await jay.getByRole('button', { name: 'Send report' }).click();
+  await jay.getByText('Thank you').waitFor();
+  await jay.getByRole('button', { name: 'Close' }).click();
+
+  // Create the moderator account through the API (409 just means it exists from an earlier run).
+  await fetch(`${API}/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: ADMIN_EMAIL, password: ADMIN_PASSWORD, name: 'EasyHand Team', accepted_terms: true }),
+  });
+  const admin = await newUser();
+  await admin.goto(`${BASE}/login`);
+  await admin.getByLabel('Email').fill(ADMIN_EMAIL);
+  await admin.getByLabel('Password').fill(ADMIN_PASSWORD);
+  await admin.getByRole('button', { name: 'Log in' }).click();
+  await admin.getByText('Community Board').waitFor();
+  await admin.getByText('Profile', { exact: true }).click();
+  await admin.getByRole('button', { name: 'Moderation' }).click();
+  const reported = admin.getByRole('link', { name: TITLE, exact: true });
+  await reported.waitFor();
+  await shot(admin, '10-moderation');
+  // The innermost element holding both the listing link and a Hide button is this report's card.
+  const reportCard = admin
+    .locator('div')
+    .filter({ has: reported })
+    .filter({ has: admin.getByRole('button', { name: 'Hide listing' }) })
+    .last();
+  await reportCard.getByRole('button', { name: 'Hide listing' }).click();
+  await reportCard.getByRole('button', { name: 'Show listing again' }).waitFor();
+
+  await jay.goto(BASE);
+  await jay.getByText('Community Board').waitFor();
+  await jay.getByRole('button', { name: 'Refresh' }).click();
+  await jay.getByText(TITLE).waitFor({ state: 'hidden' });
 
   await browser.close();
   console.log('E2E OK');

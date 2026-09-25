@@ -37,6 +37,7 @@ async def ensure_indexes(db: AsyncIOMotorDatabase) -> None:
     await db.posts.create_index("author_id")
     await db.messages.create_index([("sender_id", ASCENDING), ("recipient_id", ASCENDING), ("timestamp", ASCENDING)])
     await db.messages.create_index([("recipient_id", ASCENDING), ("timestamp", DESCENDING)])
+    await db.reports.create_index([("status", ASCENDING), ("created_at", DESCENDING)])
 
 
 def get_db() -> AsyncIOMotorDatabase:

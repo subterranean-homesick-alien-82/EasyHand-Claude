@@ -44,11 +44,12 @@ All authenticated routes take `Authorization: Bearer <token>` (returned by regis
 
 | Method | Path | Auth | Description |
 | --- | --- | --- | --- |
-| POST | `/auth/register` | | Create account → `{access_token, user}` |
+| POST | `/auth/register` | | Create account (requires `accepted_terms: true`) → `{access_token, user}` |
 | POST | `/auth/login` | | Log in → `{access_token, user}` |
 | GET | `/auth/me` | ✓ | Current user (includes email) |
 | GET | `/users/{id}` | | Public profile |
 | PUT | `/users/profile` | ✓ | Update name, neighborhood, bio, skills |
+| POST / DELETE | `/users/{id}/block` | ✓ | Block / unblock a person |
 | GET | `/posts` | | Feed. Filters: `category`, `kind`, `status`, `neighborhood`, `author_id`, `q`, `limit`, `skip` |
 | POST | `/posts` | ✓ | Create listing |
 | GET | `/posts/{id}` | | Listing detail |
@@ -57,16 +58,23 @@ All authenticated routes take `Authorization: Bearer <token>` (returned by regis
 | POST | `/messages` | ✓ | Send `{recipient_id, content, post_id?}` |
 | GET | `/messages` | ✓ | Inbox: latest message per conversation |
 | GET | `/messages/{user_id}` | ✓ | Thread with a user, oldest first (optional `post_id`) |
+| POST | `/reports` | ✓ | Report a listing or person `{target_type, target_id, reason, details?}` |
+| GET | `/admin/reports` | admin | Reports to review (`status=open\|resolved`) |
+| POST | `/admin/reports/{id}/resolve` | admin | Mark a report handled |
+| POST | `/admin/posts/{id}/hidden` | admin | `{hidden}`: hide or show a listing |
+| POST | `/admin/users/{id}/banned` | admin | `{banned}`: ban or unban (also hides their listings) |
 | POST | `/uploads/signature` | ✓ | Cloudinary upload signature (503 if not configured) |
 | GET | `/health` | | Health check |
 
 ### Data model
 
-- **users** — `email` (unique, lowercased), `hashed_password`, `name`, `neighborhood`, `bio`, `skills[]`, `created_at`
+- **users** — `email` (unique, lowercased), `hashed_password`, `name`, `neighborhood`, `bio`, `skills[]`,
+  `blocked_ids[]`, `banned?`, `accepted_terms_at`, `created_at`
 - **posts** — `author_id`, `kind` (`request`/`offer`), `title`, `description`, `category`
   (`tech`/`cleaning`/`lawncare`/`other`), `compensation`, `neighborhood`, `image_url?`,
-  `status` (`active`/`claimed`/`completed`), `created_at`
+  `status` (`active`/`claimed`/`completed`), `hidden?`, `author_banned?`, `created_at`
 - **messages** — `post_id?`, `sender_id`, `recipient_id`, `content`, `timestamp`
+- **reports** — `reporter_id`, `target_type` (`post`/`user`), `target_id`, `reason`, `details`, `status` (`open`/`resolved`), `created_at`
 
 Indexes are created on startup (`app/db.py`).
 
@@ -86,6 +94,8 @@ frontend/src/
     chat/[userId].tsx      Direct chat (polls every 4s), optionally tied to a listing
     users/[id].tsx         Public neighbor profile
     help.tsx               Help & Safety: safety tips and FAQ (visible signed in or out)
+    terms.tsx, privacy.tsx Plain-language Terms of Service and Privacy Policy
+    admin.tsx              Moderation queue (only for ADMIN_EMAILS)
   components/              PostCard, CategoryPills, SkillsEditor, UI primitives
   lib/api.ts               Typed API client
   lib/auth.tsx             Auth context; token persisted in AsyncStorage
@@ -101,6 +111,12 @@ Many EasyHand members are older or less comfortable with technology. When changi
 - Don't rely on hidden gestures. Pull-to-refresh also has a visible **Refresh** button.
 - Icon-only buttons need an `accessibilityLabel`.
 
+## Moderation
+
+Put your moderators' emails in the backend's `ADMIN_EMAILS` (comma-separated). They get a **Moderation**
+button on their Profile tab showing reports to review, where they can hide a listing or ban an account.
+Login, sign-up and report endpoints are rate-limited per IP (`app/ratelimit.py`, in-memory, so one server instance).
+
 ## Testing
 
 ```bash
@@ -109,10 +125,11 @@ cd frontend && npm run typecheck && npm run build:web
 ```
 
 Browser test of the full loop (register → post a lawncare listing → second user edits profile,
-filters the feed, messages the author → author replies from the inbox):
+filters the feed, messages the author → author replies from the inbox → the listing is reported
+and a moderator hides it):
 
 ```bash
-# terminal 1: MONGO_URL=mongomock:// uvicorn app.main:app --port 8000   (in backend/)
+# terminal 1: MONGO_URL=mongomock:// ADMIN_EMAILS=admin@example.com uvicorn app.main:app --port 8000   (in backend/)
 # terminal 2: npm run build:web && npx serve -s dist -l 8081           (in frontend/)
 cd e2e && npm install && npx playwright install chromium
 SHOTS=./shots npm test

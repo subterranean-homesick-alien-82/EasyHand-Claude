@@ -89,6 +89,7 @@ export default function ProfileScreen() {
       )}
 
       <View style={{ marginTop: spacing.xl, gap: spacing.sm }}>
+        {user.is_admin ? <Button title="Moderation" variant="secondary" onPress={() => router.push('/admin')} /> : null}
         <Button title="Help & Safety" variant="secondary" onPress={() => router.push('/help')} />
         <Text style={styles.email}>Signed in as {user.email}</Text>
         <Button title="Log out" variant="secondary" onPress={signOut} />

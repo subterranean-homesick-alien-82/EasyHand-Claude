@@ -15,6 +15,24 @@ export interface PublicUser {
 
 export interface PrivateUser extends PublicUser {
   email: string;
+  is_admin: boolean;
+  blocked_ids: string[];
+}
+
+export type ReportReason = 'scam' | 'unsafe' | 'offensive' | 'spam' | 'other';
+export type ReportTarget = 'post' | 'user';
+
+export interface AdminReport {
+  id: string;
+  target_type: ReportTarget;
+  target_id: string;
+  target_label: string;
+  target_hidden: boolean;
+  reason: ReportReason;
+  details: string;
+  reporter: AuthorSummary | null;
+  status: 'open' | 'resolved';
+  created_at: string;
 }
 
 export interface AuthorSummary {
@@ -178,13 +196,26 @@ async function request<T>(method: string, path: string, body?: unknown, query?: 
 }
 
 export const api = {
-  register: (data: { email: string; password: string; name: string; neighborhood: string }) =>
+  register: (data: { email: string; password: string; name: string; neighborhood: string; accepted_terms: boolean }) =>
     request<AuthResponse>('POST', '/auth/register', data),
   login: (email: string, password: string) => request<AuthResponse>('POST', '/auth/login', { email, password }),
   me: () => request<PrivateUser>('GET', '/auth/me'),
 
   getUser: (id: string) => request<PublicUser>('GET', `/users/${id}`),
   updateProfile: (data: ProfileUpdate) => request<PrivateUser>('PUT', '/users/profile', data),
+  blockUser: (id: string) => request<PrivateUser>('POST', `/users/${id}/block`),
+  unblockUser: (id: string) => request<PrivateUser>('DELETE', `/users/${id}/block`),
+
+  report: (data: { target_type: ReportTarget; target_id: string; reason: ReportReason; details?: string }) =>
+    request<{ id: string }>('POST', '/reports', data),
+
+  admin: {
+    listReports: (status: 'open' | 'resolved' = 'open') =>
+      request<AdminReport[]>('GET', '/admin/reports', undefined, { status }),
+    resolveReport: (id: string) => request<void>('POST', `/admin/reports/${id}/resolve`),
+    setPostHidden: (id: string, hidden: boolean) => request<void>('POST', `/admin/posts/${id}/hidden`, { hidden }),
+    setUserBanned: (id: string, banned: boolean) => request<void>('POST', `/admin/users/${id}/banned`, { banned }),
+  },
 
   listPosts: (filters: PostFilters = {}) => request<Post[]>('GET', '/posts', undefined, filters),
   getPost: (id: string) => request<Post>('GET', `/posts/${id}`),

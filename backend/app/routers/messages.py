@@ -15,8 +15,13 @@ async def send_message(body: MessageCreate, user: CurrentUser, db: Db) -> Messag
     recipient_id = parse_object_id(body.recipient_id, "recipient id")
     if recipient_id == user["_id"]:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "You cannot message yourself")
-    if await db.users.count_documents({"_id": recipient_id}, limit=1) == 0:
+    recipient = await db.users.find_one({"_id": recipient_id}, {"blocked_ids": 1, "banned": 1})
+    if recipient is None or recipient.get("banned"):
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Recipient not found")
+    if recipient_id in user.get("blocked_ids", []):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "You've blocked this person. Unblock them to send a message.")
+    if user["_id"] in recipient.get("blocked_ids", []):
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "You can't send messages to this person.")
 
     post_id: ObjectId | None = None
     if body.post_id:
@@ -40,8 +45,16 @@ async def send_message(body: MessageCreate, user: CurrentUser, db: Db) -> Messag
 async def list_conversations(user: CurrentUser, db: Db) -> list[Conversation]:
     """Inbox: one entry per person the current user has exchanged messages with, newest first."""
     me = user["_id"]
+    blocked = user.get("blocked_ids", [])
     pipeline = [
-        {"$match": {"$or": [{"sender_id": me}, {"recipient_id": me}]}},
+        {
+            "$match": {
+                "$or": [
+                    {"sender_id": me, "recipient_id": {"$nin": blocked}},
+                    {"recipient_id": me, "sender_id": {"$nin": blocked}},
+                ]
+            }
+        },
         {"$sort": {"timestamp": -1}},
         {
             "$group": {

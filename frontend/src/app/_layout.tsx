@@ -33,11 +33,14 @@ function RootNavigator() {
         <Stack.Screen name="posts/[id]" options={{ title: 'Listing' }} />
         <Stack.Screen name="chat/[userId]" options={{ title: 'Chat' }} />
         <Stack.Screen name="users/[id]" options={{ title: 'Neighbor' }} />
+        <Stack.Screen name="admin" options={{ title: 'Moderation' }} />
       </Stack.Protected>
       <Stack.Protected guard={!user}>
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
       </Stack.Protected>
       <Stack.Screen name="help" options={{ title: 'Help & Safety' }} />
+      <Stack.Screen name="terms" options={{ title: 'Terms of Service' }} />
+      <Stack.Screen name="privacy" options={{ title: 'Privacy Policy' }} />
     </Stack>
   );
 }

@@ -6,11 +6,20 @@ from fastapi import APIRouter, HTTPException, Query, Response, status
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from pymongo import DESCENDING, ReturnDocument
 
-from ..deps import CurrentUser, Db
+from ..config import get_settings
+from ..deps import CurrentUser, Db, OptionalUser
 from ..models import Category, Post, PostCreate, PostKind, PostStatus, PostStatusUpdate
 from ..utils import parse_object_id, utcnow
 
 router = APIRouter(prefix="/posts", tags=["posts"])
+
+
+# Listings hidden by a moderator, or whose author is banned, are left out for everyone but admins.
+VISIBLE = {"hidden": {"$ne": True}, "author_banned": {"$ne": True}}
+
+
+def _is_admin(user: dict[str, Any] | None) -> bool:
+    return bool(user and get_settings().is_admin(user["email"]))
 
 
 async def _authors_by_id(db: AsyncIOMotorDatabase, author_ids: set[ObjectId]) -> dict[ObjectId, dict[str, Any]]:
@@ -30,6 +39,7 @@ async def _get_post_doc(db: AsyncIOMotorDatabase, post_id: str) -> dict[str, Any
 @router.get("", response_model=list[Post])
 async def list_posts(
     db: Db,
+    viewer: OptionalUser,
     category: Category | None = None,
     kind: PostKind | None = None,
     status_: Annotated[PostStatus | None, Query(alias="status")] = None,
@@ -39,7 +49,9 @@ async def list_posts(
     limit: Annotated[int, Query(ge=1, le=100)] = 50,
     skip: Annotated[int, Query(ge=0)] = 0,
 ) -> list[Post]:
-    query: dict[str, Any] = {}
+    query: dict[str, Any] = dict(VISIBLE)
+    if viewer and viewer.get("blocked_ids"):
+        query["author_id"] = {"$nin": viewer["blocked_ids"]}
     if category:
         query["category"] = category.value
     if kind:
@@ -80,8 +92,11 @@ async def create_post(body: PostCreate, user: CurrentUser, db: Db) -> Post:
 
 
 @router.get("/{post_id}", response_model=Post)
-async def get_post(post_id: str, db: Db) -> Post:
+async def get_post(post_id: str, db: Db, viewer: OptionalUser) -> Post:
     doc = await _get_post_doc(db, post_id)
+    is_author = viewer is not None and viewer["_id"] == doc["author_id"]
+    if (doc.get("hidden") or doc.get("author_banned")) and not (is_author or _is_admin(viewer)):
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Post not found")
     author = await db.users.find_one({"_id": doc["author_id"]}, {"name": 1, "neighborhood": 1})
     return Post.from_doc(doc, author)
 
