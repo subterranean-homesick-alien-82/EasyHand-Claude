@@ -150,23 +150,25 @@ CI (`.github/workflows/ci.yml`) runs the backend tests, the frontend typecheck, 
 
 ## Deployment
 
-**Backend → Render.** Create a Blueprint from this repo; `render.yaml` defines the service.
-Set `MONGO_URL` (Atlas connection string), `CORS_ORIGINS` (your Vercel URL), and optionally the
-Cloudinary variables. `SECRET_KEY` is generated automatically. For Railway, use the same start command:
-`uvicorn app.main:app --host 0.0.0.0 --port $PORT` with root directory `backend`.
+**Follow [`docs/LAUNCH_CHECKLIST.md`](docs/LAUNCH_CHECKLIST.md)**, a step-by-step guide covering MongoDB Atlas,
+Resend, Cloudinary, Render (backend, from `render.yaml`) and Vercel (website, from `frontend/vercel.json`),
+plus costs and a pre-launch test list.
 
-**Frontend → Vercel.** Import the repo with root directory `frontend` and set
-`EXPO_PUBLIC_API_URL` to the Render URL. `vercel.json` builds the static web export and rewrites
-all routes to the SPA.
+Once it's live, check it with the read-only smoke test (creates nothing):
 
-**Photos (optional).** Set `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`
-on the backend. The app requests a signed upload from `/uploads/signature` and uploads directly to
-Cloudinary, so the secret never reaches the client. Without these, posting a listing with a photo
-shows an "Image uploads are not configured" error; text-only listings work normally.
+```bash
+cd e2e && WEB_URL=https://yourdomain.com API_URL=https://your-api.onrender.com npm run smoke
+```
+
+To put a few clearly-labelled example listings on an empty board: `python -m scripts.seed_examples team@yourdomain.com`
+(from `backend/`, with `MONGO_URL` set).
 
 ## Not yet built
 
-- Real-time chat (currently 4-second polling while a chat is open) and push notifications
-- Unread counts, reporting/blocking, ratings/reviews
-- Password reset and email verification
-- Rate limiting on auth endpoints
+Deliberately left out of the Memphis pilot:
+
+- Phone apps in the App Store / Google Play (the same code can build them later with EAS)
+- In-app payments (members pay each other directly)
+- Text-message alerts, push notifications, unread counts
+- Real-time chat (an open chat checks for new messages every 4 seconds)
+- Ratings and reviews, background checks, email verification

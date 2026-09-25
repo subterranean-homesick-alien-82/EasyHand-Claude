@@ -2,6 +2,9 @@ services:
   - type: web
     name: easyhand-api
     runtime: python
+    # Starter ($7/month) stays awake. "free" works too, but sleeps after 15 idle minutes and
+    # the next visitor waits about a minute. See docs/LAUNCH_CHECKLIST.md.
+    plan: starter
     rootDir: backend
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
