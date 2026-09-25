@@ -5,7 +5,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { PostCard } from '@/components/PostCard';
 import { ProfileHeader } from '@/components/ProfileHeader';
 import { SkillsEditor } from '@/components/SkillsEditor';
-import { Button, Card, EmptyState, ErrorText, Field } from '@/components/ui';
+import { Button, Card, Checkbox, EmptyState, ErrorText, Field } from '@/components/ui';
 import { api, type PrivateUser } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { useFocusedQuery } from '@/lib/useApi';
@@ -17,6 +17,7 @@ function ProfileEditor({ user, onDone }: { user: PrivateUser; onDone: () => void
   const [neighborhood, setNeighborhood] = useState(user.neighborhood);
   const [bio, setBio] = useState(user.bio);
   const [skills, setSkills] = useState(user.skills);
+  const [emailNotifications, setEmailNotifications] = useState(user.email_notifications);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -25,7 +26,13 @@ function ProfileEditor({ user, onDone }: { user: PrivateUser; onDone: () => void
     setBusy(true);
     setError(null);
     try {
-      await updateProfile({ name: name.trim(), neighborhood: neighborhood.trim(), bio: bio.trim(), skills });
+      await updateProfile({
+        name: name.trim(),
+        neighborhood: neighborhood.trim(),
+        bio: bio.trim(),
+        skills,
+        email_notifications: emailNotifications,
+      });
       onDone();
     } catch (err) {
       setError((err as Error).message);
@@ -47,6 +54,9 @@ function ProfileEditor({ user, onDone }: { user: PrivateUser; onDone: () => void
         placeholder="Tell neighbors what you're good at and when you're around."
       />
       <SkillsEditor value={skills} onChange={setSkills} />
+      <Checkbox checked={emailNotifications} onChange={setEmailNotifications}>
+        <Text style={styles.checkLabel}>Email me when I get a message</Text>
+      </Checkbox>
       <ErrorText message={error} />
       <View style={styles.row}>
         <Button title="Cancel" variant="secondary" onPress={onDone} style={{ flex: 1 }} />
@@ -101,6 +111,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: { padding: spacing.lg, gap: spacing.md, paddingBottom: 48, maxWidth: 720, width: '100%', alignSelf: 'center' },
   row: { flexDirection: 'row', gap: spacing.md },
+  checkLabel: { fontSize: 18, color: colors.text },
   nudge: { textAlign: 'center', color: colors.textMuted, fontSize: 17 },
   sectionTitle: { fontSize: 20, fontWeight: '800', color: colors.text, marginTop: spacing.lg },
   email: { textAlign: 'center', color: colors.textMuted, fontSize: 16 },

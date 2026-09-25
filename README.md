@@ -47,15 +47,17 @@ All authenticated routes take `Authorization: Bearer <token>` (returned by regis
 | POST | `/auth/register` | | Create account (requires `accepted_terms: true`) → `{access_token, user}` |
 | POST | `/auth/login` | | Log in → `{access_token, user}` |
 | GET | `/auth/me` | ✓ | Current user (includes email) |
+| POST | `/auth/forgot-password` | | `{email}`: emails a 1-hour reset link (same answer whether or not the account exists) |
+| POST | `/auth/reset-password` | | `{token, password}` → `{access_token, user}`; signs out older sessions |
 | GET | `/users/{id}` | | Public profile |
-| PUT | `/users/profile` | ✓ | Update name, neighborhood, bio, skills |
+| PUT | `/users/profile` | ✓ | Update name, neighborhood, bio, skills, `email_notifications` |
 | POST / DELETE | `/users/{id}/block` | ✓ | Block / unblock a person |
 | GET | `/posts` | | Feed. Filters: `category`, `kind`, `status`, `neighborhood`, `author_id`, `q`, `limit`, `skip` |
 | POST | `/posts` | ✓ | Create listing |
 | GET | `/posts/{id}` | | Listing detail |
 | PATCH | `/posts/{id}/status` | ✓ author | `active` / `claimed` / `completed` |
 | DELETE | `/posts/{id}` | ✓ author | Delete listing |
-| POST | `/messages` | ✓ | Send `{recipient_id, content, post_id?}` |
+| POST | `/messages` | ✓ | Send `{recipient_id, content, post_id?}`; emails the recipient (at most once per 30 min per sender) |
 | GET | `/messages` | ✓ | Inbox: latest message per conversation |
 | GET | `/messages/{user_id}` | ✓ | Thread with a user, oldest first (optional `post_id`) |
 | POST | `/reports` | ✓ | Report a listing or person `{target_type, target_id, reason, details?}` |
@@ -69,11 +71,13 @@ All authenticated routes take `Authorization: Bearer <token>` (returned by regis
 ### Data model
 
 - **users** — `email` (unique, lowercased), `hashed_password`, `name`, `neighborhood`, `bio`, `skills[]`,
-  `blocked_ids[]`, `banned?`, `accepted_terms_at`, `created_at`
+  `blocked_ids[]`, `banned?`, `email_notifications`, `password_changed_at?`, `accepted_terms_at`, `created_at`
 - **posts** — `author_id`, `kind` (`request`/`offer`), `title`, `description`, `category`
   (`tech`/`cleaning`/`lawncare`/`other`), `compensation`, `neighborhood`, `image_url?`,
   `status` (`active`/`claimed`/`completed`), `hidden?`, `author_banned?`, `created_at`
 - **messages** — `post_id?`, `sender_id`, `recipient_id`, `content`, `timestamp`
+- **password_resets** — `user_id`, `token_hash` (SHA-256; the raw token is only in the email), `expires_at`, `used`
+- **message_notifications** — `sender_id`, `recipient_id`, `sent_at` (throttles new-message emails)
 - **reports** — `reporter_id`, `target_type` (`post`/`user`), `target_id`, `reason`, `details`, `status` (`open`/`resolved`), `created_at`
 
 Indexes are created on startup (`app/db.py`).
@@ -85,7 +89,8 @@ frontend/src/
   app/
     _layout.tsx            auth gate (Stack.Protected) + root stack
     (auth)/welcome.tsx     Signed-out landing: "How it works" in three steps
-    (auth)/login.tsx, register.tsx
+    (auth)/login.tsx, register.tsx, forgot.tsx
+    reset-password.tsx     Opened from the reset email; works signed in or out
     (tabs)/index.tsx       Home feed: search, category pills, needs/offers toggle
     (tabs)/post.tsx        "Ask or Offer" form (with optional photo)
     (tabs)/messages.tsx    Inbox
@@ -111,6 +116,12 @@ Many EasyHand members are older or less comfortable with technology. When changi
 - Don't rely on hidden gestures. Pull-to-refresh also has a visible **Refresh** button.
 - Icon-only buttons need an `accessibilityLabel`.
 
+## Email
+
+`app/email.py` sends email through [Resend](https://resend.com) when `RESEND_API_KEY` is set. Without it,
+emails are printed in the server log instead. Handy locally, and the browser test reads the reset link from there.
+Emails go out for password resets and new messages. Members can turn off message emails in their profile.
+
 ## Moderation
 
 Put your moderators' emails in the backend's `ADMIN_EMAILS` (comma-separated). They get a **Moderation**
@@ -126,13 +137,13 @@ cd frontend && npm run typecheck && npm run build:web
 
 Browser test of the full loop (register → post a lawncare listing → second user edits profile,
 filters the feed, messages the author → author replies from the inbox → the listing is reported
-and a moderator hides it):
+and a moderator hides it → the author resets a forgotten password):
 
 ```bash
 # terminal 1: MONGO_URL=mongomock:// ADMIN_EMAILS=admin@example.com uvicorn app.main:app --port 8000   (in backend/)
 # terminal 2: npm run build:web && npx serve -s dist -l 8081           (in frontend/)
 cd e2e && npm install && npx playwright install chromium
-SHOTS=./shots npm test
+SHOTS=./shots EMAIL_LOG=/path/to/api-server.log npm test   # EMAIL_LOG is optional; enables the password-reset steps
 ```
 
 CI (`.github/workflows/ci.yml`) runs the backend tests, the frontend typecheck, and the web build.

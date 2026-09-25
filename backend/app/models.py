@@ -62,6 +62,15 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str = Field(min_length=10, max_length=200)
+    password: str = Field(min_length=8, max_length=128)
+
+
 # ---------- Users ----------
 
 
@@ -70,6 +79,7 @@ class ProfileUpdate(BaseModel):
     neighborhood: str | None = Field(default=None, max_length=80)
     bio: str | None = Field(default=None, max_length=1000)
     skills: list[str] | None = None
+    email_notifications: bool | None = None
 
     @field_validator("skills")
     @classmethod
@@ -101,6 +111,7 @@ class PrivateUser(PublicUser):
     email: EmailStr
     is_admin: bool = False
     blocked_ids: list[str] = []
+    email_notifications: bool = True
 
     @classmethod
     def from_doc(cls, doc: dict[str, Any]) -> "PrivateUser":
@@ -109,6 +120,7 @@ class PrivateUser(PublicUser):
             email=doc["email"],
             is_admin=get_settings().is_admin(doc["email"]),
             blocked_ids=[str(b) for b in doc.get("blocked_ids", [])],
+            email_notifications=doc.get("email_notifications", True),
         )
 
 

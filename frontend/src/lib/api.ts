@@ -17,6 +17,7 @@ export interface PrivateUser extends PublicUser {
   email: string;
   is_admin: boolean;
   blocked_ids: string[];
+  email_notifications: boolean;
 }
 
 export type ReportReason = 'scam' | 'unsafe' | 'offensive' | 'spam' | 'other';
@@ -91,6 +92,7 @@ export interface ProfileUpdate {
   neighborhood?: string;
   bio?: string;
   skills?: string[];
+  email_notifications?: boolean;
 }
 
 export interface PostFilters {
@@ -200,6 +202,9 @@ export const api = {
     request<AuthResponse>('POST', '/auth/register', data),
   login: (email: string, password: string) => request<AuthResponse>('POST', '/auth/login', { email, password }),
   me: () => request<PrivateUser>('GET', '/auth/me'),
+  forgotPassword: (email: string) => request<{ detail: string }>('POST', '/auth/forgot-password', { email }),
+  resetPassword: (token: string, password: string) =>
+    request<AuthResponse>('POST', '/auth/reset-password', { token, password }),
 
   getUser: (id: string) => request<PublicUser>('GET', `/users/${id}`),
   updateProfile: (data: ProfileUpdate) => request<PrivateUser>('PUT', '/users/profile', data),

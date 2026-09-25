@@ -1,3 +1,5 @@
+import hashlib
+import secrets
 from datetime import datetime, timedelta, timezone
 
 import jwt
@@ -28,11 +30,23 @@ def create_access_token(user_id: str) -> str:
     return jwt.encode(payload, settings.secret_key, algorithm=ALGORITHM)
 
 
-def decode_access_token(token: str) -> str | None:
-    """Return the user id encoded in the token, or None if the token is invalid or expired."""
+def decode_access_token(token: str) -> tuple[str, int] | None:
+    """Return (user id, issued-at seconds) from the token, or None if it is invalid or expired."""
     try:
         payload = jwt.decode(token, get_settings().secret_key, algorithms=[ALGORITHM])
     except jwt.PyJWTError:
         return None
-    sub = payload.get("sub")
-    return sub if isinstance(sub, str) else None
+    sub, iat = payload.get("sub"), payload.get("iat")
+    if not isinstance(sub, str) or not isinstance(iat, int):
+        return None
+    return sub, iat
+
+
+def new_reset_token() -> tuple[str, str]:
+    """A random password-reset token and the hash we store (so a database leak can't be used to reset passwords)."""
+    token = secrets.token_urlsafe(32)
+    return token, hash_reset_token(token)
+
+
+def hash_reset_token(token: str) -> str:
+    return hashlib.sha256(token.encode()).hexdigest()

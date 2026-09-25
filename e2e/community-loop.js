@@ -1,7 +1,9 @@
+const fs = require('fs');
 const { chromium } = require('playwright');
 // Browser test of the core loop against a running API + web build. See README "Testing".
 // Env: WEB_URL (default http://localhost:8081), API_URL (default http://localhost:8000),
 //      ADMIN_EMAIL / ADMIN_PASSWORD (must be in the API's ADMIN_EMAILS; default admin@example.com),
+//      EMAIL_LOG (API server log file; enables the password-reset steps, which read the link from it),
 //      SHOTS (dir for screenshots, optional),
 //      CHROMIUM_PATH (optional executable path).
 const SHOTS = process.env.SHOTS;
@@ -128,19 +130,44 @@ const TITLE = `Front yard needs mowing this weekend #${stamp % 100000}`;
   const reported = admin.getByRole('link', { name: TITLE, exact: true });
   await reported.waitFor();
   await shot(admin, '10-moderation');
-  // The innermost element holding both the listing link and a Hide button is this report's card.
-  const reportCard = admin
-    .locator('div')
-    .filter({ has: reported })
-    .filter({ has: admin.getByRole('button', { name: 'Hide listing' }) })
-    .last();
-  await reportCard.getByRole('button', { name: 'Hide listing' }).click();
-  await reportCard.getByRole('button', { name: 'Show listing again' }).waitFor();
+  // The innermost element holding both this listing's link and a given button is this report's card.
+  const cardWith = (button) =>
+    admin.locator('div').filter({ has: reported }).filter({ has: admin.getByRole('button', { name: button }) }).last();
+  await cardWith('Hide listing').getByRole('button', { name: 'Hide listing' }).click();
+  await cardWith('Show listing again').waitFor();
 
   await jay.goto(BASE);
   await jay.getByText('Community Board').waitFor();
   await jay.getByRole('button', { name: 'Refresh' }).click();
   await jay.getByText(TITLE).waitFor({ state: 'hidden' });
+
+  // 5. Maria forgot her password: request a link and use it (needs the API's log, where unsent emails go)
+  if (process.env.EMAIL_LOG) {
+    const log = () => fs.readFileSync(process.env.EMAIL_LOG, 'utf8');
+    if (!log().includes('Jay Carter sent you a message on EasyHand')) throw new Error('No new-message email in log');
+
+    const forgot = await newUser();
+    await forgot.goto(`${BASE}/login`);
+    await forgot.getByText('Forgot your password?').click();
+    await forgot.getByLabel('Email').filter({ visible: true }).fill(`maria${stamp}@example.com`);
+    await forgot.getByRole('button', { name: 'Email me a link' }).click();
+    await forgot.getByText('Check your email').waitFor();
+    await shot(forgot, '11-forgot-sent');
+
+    let link;
+    for (let i = 0; i < 20 && !link; i++) {
+      const matches = [...log().matchAll(/\/reset-password\?token=([\w-]+)/g)];
+      link = matches.length ? matches[matches.length - 1][1] : undefined;
+      if (!link) await new Promise((r) => setTimeout(r, 250));
+    }
+    if (!link) throw new Error('No reset link in log');
+    await forgot.goto(`${BASE}/reset-password?token=${link}`);
+    await forgot.getByLabel('New password').fill('a-new-password');
+    await forgot.getByLabel('Type it again').fill('a-new-password');
+    await shot(forgot, '12-reset');
+    await forgot.getByRole('button', { name: 'Save new password' }).click();
+    await forgot.getByText('Community Board').waitFor();
+  }
 
   await browser.close();
   console.log('E2E OK');

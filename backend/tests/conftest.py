@@ -3,6 +3,7 @@ from httpx import ASGITransport, AsyncClient
 
 from app.config import Settings, get_settings
 from app.db import connect, disconnect, ensure_indexes
+from app import email
 from app.main import create_app
 from app.ratelimit import limiter
 
@@ -14,6 +15,7 @@ def _settings(monkeypatch):
     monkeypatch.setenv("ADMIN_EMAILS", ADMIN_EMAIL)
     get_settings.cache_clear()
     limiter.reset()
+    email.outbox.clear()
     yield
     get_settings.cache_clear()
 

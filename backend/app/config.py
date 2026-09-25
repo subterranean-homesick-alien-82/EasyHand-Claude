@@ -27,6 +27,13 @@ class Settings(BaseSettings):
     # Set to false to turn off per-IP rate limits on login/sign-up (e.g. for load testing).
     rate_limit_enabled: bool = True
 
+    # Public web address of the app, used for links in emails (no trailing slash).
+    app_url: str = "http://localhost:8081"
+
+    # Email via Resend (https://resend.com). Without an API key, emails are logged instead of sent.
+    resend_api_key: str | None = None
+    email_from: str = "EasyHand <onboarding@resend.dev>"
+
     cloudinary_cloud_name: str | None = None
     cloudinary_api_key: str | None = None
     cloudinary_api_secret: str | None = None

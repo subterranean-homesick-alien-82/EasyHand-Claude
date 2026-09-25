@@ -39,6 +39,7 @@ function RootNavigator() {
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
       </Stack.Protected>
       <Stack.Screen name="help" options={{ title: 'Help & Safety' }} />
+      <Stack.Screen name="reset-password" options={{ title: 'Choose a new password' }} />
       <Stack.Screen name="terms" options={{ title: 'Terms of Service' }} />
       <Stack.Screen name="privacy" options={{ title: 'Privacy Policy' }} />
     </Stack>
