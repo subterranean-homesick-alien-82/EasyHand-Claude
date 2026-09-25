@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 
-import { Avatar, EmptyState, ErrorText } from '@/components/ui';
+import { Avatar, EmptyState, ErrorText, RefreshButton } from '@/components/ui';
 import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { timeAgo } from '@/lib/format';
@@ -20,7 +20,12 @@ export default function MessagesScreen() {
       keyExtractor={(c) => c.other_user.id}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.primary} />}
       contentContainerStyle={styles.list}
-      ListHeaderComponent={<ErrorText message={error} />}
+      ListHeaderComponent={
+        <View style={styles.header}>
+          <RefreshButton onPress={refresh} refreshing={refreshing} />
+          <ErrorText message={error} />
+        </View>
+      }
       ListEmptyComponent={
         error ? null : (
           <EmptyState
@@ -65,9 +70,10 @@ const styles = StyleSheet.create({
   list: { paddingVertical: spacing.sm, maxWidth: 720, width: '100%', alignSelf: 'center' },
   row: { flexDirection: 'row', gap: spacing.md, paddingHorizontal: spacing.lg, paddingVertical: spacing.md, alignItems: 'center' },
   rowTop: { flexDirection: 'row', justifyContent: 'space-between', gap: spacing.sm },
-  name: { fontWeight: '700', fontSize: 16, color: colors.text, flexShrink: 1 },
-  neighborhood: { color: colors.textMuted, fontSize: 12 },
-  time: { color: colors.textMuted, fontSize: 12 },
-  preview: { color: colors.textMuted },
+  name: { fontWeight: '700', fontSize: 18, color: colors.text, flexShrink: 1 },
+  neighborhood: { color: colors.textMuted, fontSize: 15 },
+  time: { color: colors.textMuted, fontSize: 15 },
+  preview: { color: colors.textMuted, fontSize: 17 },
+  header: { paddingHorizontal: spacing.lg, paddingBottom: spacing.sm, gap: spacing.sm },
   separator: { height: 1, backgroundColor: colors.border, marginLeft: 76 },
 });

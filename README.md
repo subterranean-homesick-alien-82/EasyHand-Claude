@@ -76,18 +76,30 @@ Indexes are created on startup (`app/db.py`).
 frontend/src/
   app/
     _layout.tsx            auth gate (Stack.Protected) + root stack
+    (auth)/welcome.tsx     Signed-out landing: "How it works" in three steps
     (auth)/login.tsx, register.tsx
-    (tabs)/index.tsx       Explore feed: search, category pills, needs/offers toggle
-    (tabs)/post.tsx        New listing form (with optional photo)
+    (tabs)/index.tsx       Home feed: search, category pills, needs/offers toggle
+    (tabs)/post.tsx        "Ask or Offer" form (with optional photo)
     (tabs)/messages.tsx    Inbox
     (tabs)/profile.tsx     My profile, skills editor, my listings
     posts/[id].tsx         Listing detail; message author or manage your own listing
     chat/[userId].tsx      Direct chat (polls every 4s), optionally tied to a listing
     users/[id].tsx         Public neighbor profile
+    help.tsx               Help & Safety: safety tips and FAQ (visible signed in or out)
   components/              PostCard, CategoryPills, SkillsEditor, UI primitives
   lib/api.ts               Typed API client
   lib/auth.tsx             Auth context; token persisted in AsyncStorage
 ```
+
+## Design for everyone
+
+Many EasyHand members are older or less comfortable with technology. When changing the UI:
+
+- Body text is at least 17–18px. Anything tappable is at least 56px tall (`TAP_TARGET` in `src/theme.ts`).
+- Text colors meet WCAG AA contrast (4.5:1), including tag text on its tinted background.
+- Use plain words ("Post it", "Someone is helping"), not jargon ("Submit", "Claimed").
+- Don't rely on hidden gestures. Pull-to-refresh also has a visible **Refresh** button.
+- Icon-only buttons need an `accessibilityLabel`.
 
 ## Testing
 

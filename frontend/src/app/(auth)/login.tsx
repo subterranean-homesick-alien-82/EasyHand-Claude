@@ -31,7 +31,7 @@ export default function LoginScreen() {
       <Field label="Password" value={password} onChangeText={setPassword} secureTextEntry autoComplete="password" onSubmitEditing={submit} />
       <ErrorText message={error} />
       <Button title="Log in" onPress={submit} loading={busy} disabled={!email || !password} />
-      <Text style={{ textAlign: 'center', color: colors.textMuted }}>
+      <Text style={{ textAlign: 'center', color: colors.textMuted, fontSize: 17, lineHeight: 26 }}>
         New to EasyHand?{' '}
         <Link href="/register" style={{ color: colors.primary, fontWeight: '700' }}>
           Create an account

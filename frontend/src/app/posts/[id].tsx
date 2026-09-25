@@ -103,16 +103,15 @@ export default function PostDetailScreen() {
       {isMine ? (
         <View style={{ gap: spacing.sm }}>
           <Text style={styles.sectionLabel}>Manage your listing</Text>
-          <View style={styles.row}>
-            {post.status !== 'active' ? (
-              <Button title="Reopen" variant="secondary" style={{ flex: 1 }} loading={busy === 'active'} onPress={() => setStatus('active')} />
-            ) : (
-              <Button title="Mark claimed" variant="secondary" style={{ flex: 1 }} loading={busy === 'claimed'} onPress={() => setStatus('claimed')} />
-            )}
-            {post.status !== 'completed' ? (
-              <Button title="Mark completed" style={{ flex: 1 }} loading={busy === 'completed'} onPress={() => setStatus('completed')} />
-            ) : null}
-          </View>
+          {post.status === 'active' ? (
+            <Button title="Someone is helping" variant="secondary" loading={busy === 'claimed'} onPress={() => setStatus('claimed')} />
+          ) : null}
+          {post.status !== 'completed' ? (
+            <Button title="Mark as done" loading={busy === 'completed'} onPress={() => setStatus('completed')} />
+          ) : null}
+          {post.status !== 'active' ? (
+            <Button title="Reopen listing" variant="secondary" loading={busy === 'active'} onPress={() => setStatus('active')} />
+          ) : null}
           <Button title="Delete listing" variant="danger" loading={busy === 'delete'} onPress={remove} />
         </View>
       ) : post.author ? (
@@ -134,8 +133,8 @@ export default function PostDetailScreen() {
 const styles = StyleSheet.create({
   container: { padding: spacing.lg, gap: spacing.md, paddingBottom: 48, maxWidth: 720, width: '100%', alignSelf: 'center' },
   tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
-  title: { fontSize: 26, fontWeight: '800', color: colors.text },
-  posted: { color: colors.textMuted },
+  title: { fontSize: 28, fontWeight: '800', color: colors.text },
+  posted: { color: colors.textMuted, fontSize: 17 },
   image: { width: '100%', height: 260, borderRadius: radius.lg, backgroundColor: colors.border },
   compensation: {
     flexDirection: 'row',
@@ -145,11 +144,10 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     borderRadius: radius.md,
   },
-  compensationText: { fontWeight: '700', color: colors.primaryDark, fontSize: 16 },
-  description: { fontSize: 16, lineHeight: 24, color: colors.text },
+  compensationText: { fontWeight: '700', color: colors.primaryDark, fontSize: 18 },
+  description: { fontSize: 18, lineHeight: 24, color: colors.text },
   authorCard: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, padding: spacing.md },
-  authorName: { fontWeight: '700', fontSize: 16, color: colors.text },
-  authorMeta: { color: colors.textMuted, fontSize: 13 },
-  sectionLabel: { fontWeight: '700', color: colors.textMuted, marginTop: spacing.sm },
-  row: { flexDirection: 'row', gap: spacing.md },
+  authorName: { fontWeight: '700', fontSize: 18, color: colors.text },
+  authorMeta: { color: colors.textMuted, fontSize: 16 },
+  sectionLabel: { fontWeight: '700', color: colors.textMuted, fontSize: 17, marginTop: spacing.sm },
 });

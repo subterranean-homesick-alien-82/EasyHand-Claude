@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
@@ -88,6 +89,7 @@ export default function ProfileScreen() {
       )}
 
       <View style={{ marginTop: spacing.xl, gap: spacing.sm }}>
+        <Button title="Help & Safety" variant="secondary" onPress={() => router.push('/help')} />
         <Text style={styles.email}>Signed in as {user.email}</Text>
         <Button title="Log out" variant="secondary" onPress={signOut} />
       </View>
@@ -98,7 +100,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: { padding: spacing.lg, gap: spacing.md, paddingBottom: 48, maxWidth: 720, width: '100%', alignSelf: 'center' },
   row: { flexDirection: 'row', gap: spacing.md },
-  nudge: { textAlign: 'center', color: colors.textMuted },
-  sectionTitle: { fontSize: 18, fontWeight: '800', color: colors.text, marginTop: spacing.lg },
-  email: { textAlign: 'center', color: colors.textMuted, fontSize: 13 },
+  nudge: { textAlign: 'center', color: colors.textMuted, fontSize: 17 },
+  sectionTitle: { fontSize: 20, fontWeight: '800', color: colors.text, marginTop: spacing.lg },
+  email: { textAlign: 'center', color: colors.textMuted, fontSize: 16 },
 });

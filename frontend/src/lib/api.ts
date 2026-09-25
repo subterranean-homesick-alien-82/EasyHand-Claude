@@ -118,6 +118,20 @@ export function setUnauthorizedHandler(handler: (() => void) | null) {
   onUnauthorized = handler;
 }
 
+// Plain-language names for API fields, used when the server rejects a form.
+const FIELD_NAMES: Record<string, string> = {
+  email: 'email address',
+  password: 'password',
+  name: 'name',
+  neighborhood: 'neighborhood',
+  title: 'title',
+  description: 'details',
+  compensation: 'price',
+  bio: 'about you',
+  content: 'message',
+  image_url: 'photo',
+};
+
 function errorMessage(body: unknown, fallback: string): string {
   const detail = (body as { detail?: unknown } | null)?.detail;
   if (typeof detail === 'string') return detail;
@@ -125,7 +139,9 @@ function errorMessage(body: unknown, fallback: string): string {
     // FastAPI validation errors: [{ loc: [...], msg: "..." }]
     const first = detail[0] as { loc?: unknown[]; msg?: string };
     const field = first.loc?.[first.loc.length - 1];
-    return field && typeof field === 'string' ? `${field}: ${first.msg}` : (first.msg ?? fallback);
+    const name = typeof field === 'string' ? (FIELD_NAMES[field] ?? field) : null;
+    if (name === 'email address') return 'Please check your email address. It should look like name@example.com.';
+    return name ? `Please check the ${name}. (${first.msg ?? 'invalid'})` : (first.msg ?? fallback);
   }
   return fallback;
 }
@@ -149,14 +165,14 @@ async function request<T>(method: string, path: string, body?: unknown, query?: 
   try {
     res = await fetch(url, { method, headers, body: body === undefined ? undefined : JSON.stringify(body) });
   } catch {
-    throw new ApiError(0, `Can't reach the EasyHand server at ${API_URL}.`);
+    throw new ApiError(0, "We couldn't connect to EasyHand. Please check your internet connection and try again.");
   }
 
   if (res.status === 204) return undefined as T;
   const data = await res.json().catch(() => null);
   if (!res.ok) {
     if (res.status === 401 && authToken) onUnauthorized?.();
-    throw new ApiError(res.status, errorMessage(data, `Request failed (${res.status})`));
+    throw new ApiError(res.status, errorMessage(data, 'Something went wrong on our end. Please try again in a moment.'));
   }
   return data as T;
 }

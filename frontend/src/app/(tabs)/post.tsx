@@ -11,8 +11,8 @@ import { useAuth } from '@/lib/auth';
 import { colors, radius, spacing } from '@/theme';
 
 const KINDS: { value: PostKind; title: string; subtitle: string; icon: 'hand-left-outline' | 'heart-outline' }[] = [
-  { value: 'request', title: 'I need help', subtitle: 'Ask neighbors for a hand', icon: 'hand-left-outline' },
-  { value: 'offer', title: 'I can help', subtitle: 'Offer your skills', icon: 'heart-outline' },
+  { value: 'request', title: 'I need a hand', subtitle: 'Ask a neighbor for help', icon: 'hand-left-outline' },
+  { value: 'offer', title: 'I can lend a hand', subtitle: 'Offer your skills', icon: 'heart-outline' },
 ];
 
 export default function NewPostScreen() {
@@ -88,21 +88,21 @@ export default function NewPostScreen() {
         </View>
 
         <View style={{ gap: spacing.xs }}>
-          <Text style={styles.label}>Category</Text>
+          <Text style={styles.label}>What kind of help?</Text>
           <View style={{ marginHorizontal: -spacing.lg }}>
             <CategoryPills value={category} onChange={(c) => c && setCategory(c)} />
           </View>
         </View>
 
         <Field
-          label="Title"
+          label="Short title"
           value={title}
           onChangeText={setTitle}
           maxLength={120}
           placeholder={kind === 'request' ? 'e.g. Printer keeps going offline' : 'e.g. Weekend lawn mowing in Midtown'}
         />
         <Field
-          label="Description"
+          label="Details"
           value={description}
           onChangeText={setDescription}
           multiline
@@ -110,7 +110,7 @@ export default function NewPostScreen() {
           placeholder="Share the details: what's involved, timing, tools needed…"
         />
         <Field
-          label={kind === 'request' ? 'Budget / compensation' : 'Rate'}
+          label={kind === 'request' ? 'What will you pay? (optional)' : 'What do you charge? (optional)'}
           value={compensation}
           onChangeText={setCompensation}
           maxLength={120}
@@ -136,7 +136,7 @@ export default function NewPostScreen() {
         </View>
 
         <ErrorText message={error} />
-        <Button title="Post to the board" onPress={submit} loading={busy} />
+        <Button title="Post it" onPress={submit} loading={busy} />
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -144,7 +144,7 @@ export default function NewPostScreen() {
 
 const styles = StyleSheet.create({
   container: { padding: spacing.lg, gap: spacing.lg, paddingBottom: 48, maxWidth: 720, width: '100%', alignSelf: 'center' },
-  label: { fontWeight: '600', color: colors.text, fontSize: 14 },
+  label: { fontWeight: '600', color: colors.text, fontSize: 17 },
   kindRow: { flexDirection: 'row', gap: spacing.md },
   kindCard: {
     flex: 1,
@@ -156,8 +156,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
   },
   kindCardSelected: { borderColor: colors.primary, backgroundColor: colors.primarySoft },
-  kindTitle: { fontWeight: '700', fontSize: 16, color: colors.text },
-  kindSubtitle: { color: colors.textMuted, fontSize: 13 },
+  kindTitle: { fontWeight: '700', fontSize: 18, color: colors.text },
+  kindSubtitle: { color: colors.textMuted, fontSize: 16 },
   photoPicker: {
     height: 110,
     borderRadius: radius.md,

@@ -45,7 +45,7 @@ export function SkillsEditor({ value, onChange }: { value: string[]; onChange: (
 }
 
 const styles = StyleSheet.create({
-  label: { fontWeight: '600', color: colors.text, fontSize: 14 },
+  label: { fontWeight: '600', color: colors.text, fontSize: 17 },
   tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   input: {
     backgroundColor: colors.surface,
@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     paddingHorizontal: spacing.md,
     paddingVertical: 12,
-    fontSize: 16,
+    fontSize: 18,
     color: colors.text,
   },
 });
