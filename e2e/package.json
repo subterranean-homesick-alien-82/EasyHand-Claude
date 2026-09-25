@@ -1,0 +1,10 @@
+{
+  "name": "easyhand-e2e",
+  "private": true,
+  "scripts": {
+    "test": "node community-loop.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.56.1"
+  }
+}

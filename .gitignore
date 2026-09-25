@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.env
+
+# Node / Expo
+node_modules/
+.expo/
+dist/
+web-build/
+*.tsbuildinfo
+.env*.local
+ios/
+android/
+
+.DS_Store
+
+# E2E screenshots
+e2e/shots/
