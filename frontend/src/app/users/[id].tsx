@@ -49,5 +49,5 @@ export default function UserProfileScreen() {
 
 const styles = StyleSheet.create({
   container: { padding: spacing.lg, gap: spacing.md, paddingBottom: 48, maxWidth: 720, width: '100%', alignSelf: 'center' },
-  sectionTitle: { fontSize: 18, fontWeight: '800', color: colors.text, marginTop: spacing.lg },
+  sectionTitle: { fontSize: 20, fontWeight: '800', color: colors.text, marginTop: spacing.lg },
 });

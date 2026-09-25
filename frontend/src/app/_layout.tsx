@@ -37,6 +37,7 @@ function RootNavigator() {
       <Stack.Protected guard={!user}>
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
       </Stack.Protected>
+      <Stack.Screen name="help" options={{ title: 'Help & Safety' }} />
     </Stack>
   );
 }

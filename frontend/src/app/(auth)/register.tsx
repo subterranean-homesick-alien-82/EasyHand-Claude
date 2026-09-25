@@ -39,7 +39,7 @@ export default function RegisterScreen() {
       <Field label="Password" value={password} onChangeText={setPassword} secureTextEntry hint="At least 8 characters" autoComplete="new-password" />
       <ErrorText message={error} />
       <Button title="Create account" onPress={submit} loading={busy} disabled={!name || !email || !password} />
-      <Text style={{ textAlign: 'center', color: colors.textMuted }}>
+      <Text style={{ textAlign: 'center', color: colors.textMuted, fontSize: 17, lineHeight: 26 }}>
         Already a member?{' '}
         <Link href="/login" style={{ color: colors.primary, fontWeight: '700' }}>
           Log in

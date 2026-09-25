@@ -35,10 +35,10 @@ export function ProfileHeader({ user }: { user: PublicUser }) {
 
 const styles = StyleSheet.create({
   container: { alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.lg },
-  name: { fontSize: 24, fontWeight: '800', color: colors.text },
+  name: { fontSize: 26, fontWeight: '800', color: colors.text },
   metaRow: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: spacing.md },
   meta: { flexDirection: 'row', alignItems: 'center', gap: 3 },
-  metaText: { color: colors.textMuted, fontSize: 13 },
-  bio: { color: colors.text, textAlign: 'center', lineHeight: 21, maxWidth: 480 },
+  metaText: { color: colors.textMuted, fontSize: 16 },
+  bio: { color: colors.text, fontSize: 18, textAlign: 'center', lineHeight: 26, maxWidth: 480 },
   skills: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 6, marginTop: spacing.xs },
 });

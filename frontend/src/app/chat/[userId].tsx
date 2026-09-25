@@ -135,7 +135,7 @@ export default function ChatScreen() {
           disabled={!draft.trim() || sending}
           style={[styles.send, (!draft.trim() || sending) && { opacity: 0.5 }]}
         >
-          <Ionicons name="send" size={18} color="#fff" />
+          <Ionicons name="send" size={22} color="#fff" />
         </Pressable>
       </View>
     </KeyboardAvoidingView>
@@ -151,15 +151,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
   },
-  contextText: { color: colors.primaryDark, fontWeight: '600', flex: 1 },
+  contextText: { color: colors.primaryDark, fontWeight: '600', fontSize: 17, flex: 1 },
   list: { padding: spacing.lg, gap: spacing.sm, flexGrow: 1, maxWidth: 720, width: '100%', alignSelf: 'center' },
-  empty: { textAlign: 'center', color: colors.textMuted, marginTop: 48, lineHeight: 20 },
+  empty: { textAlign: 'center', color: colors.textMuted, fontSize: 17, marginTop: 48, lineHeight: 24 },
   bubbleRow: { flexDirection: 'row' },
   bubble: { maxWidth: '80%', paddingHorizontal: 14, paddingVertical: 9, borderRadius: radius.lg, gap: 2 },
   bubbleMine: { backgroundColor: colors.bubbleMine, borderBottomRightRadius: 4 },
   bubbleTheirs: { backgroundColor: colors.bubbleTheirs, borderBottomLeftRadius: 4, borderWidth: 1, borderColor: colors.border },
-  bubbleText: { fontSize: 16, color: colors.text, lineHeight: 21 },
-  bubbleTime: { fontSize: 11, color: colors.textMuted, alignSelf: 'flex-end' },
+  bubbleText: { fontSize: 18, color: colors.text, lineHeight: 21 },
+  bubbleTime: { fontSize: 14, color: colors.textMuted, alignSelf: 'flex-end' },
   composer: {
     flexDirection: 'row',
     alignItems: 'flex-end',
@@ -177,14 +177,14 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingHorizontal: 14,
     paddingVertical: 10,
-    fontSize: 16,
+    fontSize: 18,
     color: colors.text,
   },
   send: {
     backgroundColor: colors.primary,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     alignItems: 'center',
     justifyContent: 'center',
   },

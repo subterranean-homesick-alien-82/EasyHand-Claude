@@ -10,7 +10,7 @@ const TITLE = `Front yard needs mowing this weekend #${stamp % 100000}`;
 (async () => {
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined });
   const newUser = async () => {
-    const ctx = await browser.newContext({ viewport: { width: 420, height: 860 } });
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
     const page = await ctx.newPage();
     page.on('pageerror', (e) => console.log('PAGE ERROR', e.message));
     page.on('dialog', (d) => d.accept());
@@ -20,7 +20,15 @@ const TITLE = `Front yard needs mowing this weekend #${stamp % 100000}`;
 
   // 1. Maria registers and posts a lawncare listing
   const maria = await newUser();
-  await maria.goto(`${BASE}/register`);
+  await maria.goto(BASE);
+  await maria.getByText('How it works').waitFor();
+  await shot(maria, '00-welcome');
+  await maria.getByText('Questions? Read Help & Safety').click();
+  await maria.getByText('Staying safe').waitFor();
+  await shot(maria, '00-help');
+  await maria.goBack();
+  await maria.getByText('How it works').waitFor();
+  await maria.getByRole('button', { name: "Join EasyHand. It's free" }).click();
   await maria.getByLabel('Your name').fill('Maria Lopez');
   await maria.getByLabel('Neighborhood').fill('Midtown');
   await maria.getByLabel('Email').fill(`maria${stamp}@example.com`);
@@ -30,11 +38,11 @@ const TITLE = `Front yard needs mowing this weekend #${stamp % 100000}`;
   await maria.getByText('Community Board').waitFor();
   await maria.getByText('Post', { exact: true }).click();
   await maria.getByRole('button', { name: 'Lawncare' }).filter({ visible: true }).click();
-  await maria.getByLabel('Title').fill(TITLE);
-  await maria.getByLabel('Description').fill('Small front yard off Cooper St. Mower and trimmer are in the shed.');
-  await maria.getByLabel('Budget / compensation').fill('$30 + lemonade');
+  await maria.getByLabel('Short title').fill(TITLE);
+  await maria.getByLabel('Details').fill('Small front yard off Cooper St. Mower and trimmer are in the shed.');
+  await maria.getByLabel('What will you pay? (optional)').fill('$30 + lemonade');
   await shot(maria, '02-new-post');
-  await maria.getByRole('button', { name: 'Post to the board' }).click();
+  await maria.getByRole('button', { name: 'Post it' }).click();
   await maria.getByText('Manage your listing').waitFor();
   await shot(maria, '03-post-detail-owner');
 
@@ -56,7 +64,7 @@ const TITLE = `Front yard needs mowing this weekend #${stamp % 100000}`;
   await jay.getByText('Lawn Care Enthusiast').waitFor();
   await shot(jay, '04-profile');
 
-  await jay.getByText('Explore', { exact: true }).click();
+  await jay.getByText('Home', { exact: true }).click();
   await jay.getByText(TITLE).waitFor();
   await shot(jay, '05-feed');
   // Category filter: Tech Support should hide the lawncare listing

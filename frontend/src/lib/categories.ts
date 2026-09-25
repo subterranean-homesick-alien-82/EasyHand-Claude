@@ -6,10 +6,10 @@ import type { Category, PostKind, PostStatus } from './api';
 type IconName = ComponentProps<typeof Ionicons>['name'];
 
 export const CATEGORIES: { value: Category; label: string; icon: IconName; color: string }[] = [
-  { value: 'tech', label: 'Tech Support', icon: 'laptop-outline', color: '#3B6FB6' },
-  { value: 'cleaning', label: 'Cleaning', icon: 'sparkles-outline', color: '#8A5CC2' },
-  { value: 'lawncare', label: 'Lawncare', icon: 'leaf-outline', color: '#2F7D55' },
-  { value: 'other', label: 'Odd Jobs', icon: 'construct-outline', color: '#B7722A' },
+  { value: 'tech', label: 'Tech Support', icon: 'laptop-outline', color: '#325F9E' },
+  { value: 'cleaning', label: 'Cleaning', icon: 'sparkles-outline', color: '#7A4FB0' },
+  { value: 'lawncare', label: 'Lawncare', icon: 'leaf-outline', color: '#276B48' },
+  { value: 'other', label: 'Odd Jobs', icon: 'construct-outline', color: '#94591C' },
 ];
 
 export function categoryInfo(value: Category) {
@@ -17,12 +17,12 @@ export function categoryInfo(value: Category) {
 }
 
 export const KIND_LABELS: Record<PostKind, string> = {
-  request: 'Needs help',
-  offer: 'Offering help',
+  request: 'Needs a hand',
+  offer: 'Offering a hand',
 };
 
 export const STATUS_LABELS: Record<PostStatus, string> = {
   active: 'Active',
-  claimed: 'Claimed',
-  completed: 'Completed',
+  claimed: 'Someone is helping',
+  completed: 'Done',
 };

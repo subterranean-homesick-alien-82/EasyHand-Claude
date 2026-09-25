@@ -1,3 +1,4 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import type { ReactNode } from 'react';
 import {
   ActivityIndicator,
@@ -12,7 +13,7 @@ import {
 } from 'react-native';
 
 import { initials } from '@/lib/format';
-import { colors, radius, spacing } from '@/theme';
+import { colors, radius, spacing, TAP_TARGET } from '@/theme';
 
 export function Button({
   title,
@@ -54,6 +55,22 @@ export function Button({
           <Text style={[styles.buttonText, variant === 'secondary' && { color: colors.primary }]}>{title}</Text>
         </View>
       )}
+    </Pressable>
+  );
+}
+
+/** A visible alternative to pull-to-refresh, which many people don't know about. */
+export function RefreshButton({ onPress, refreshing }: { onPress: () => void; refreshing?: boolean }) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel="Refresh"
+      onPress={onPress}
+      disabled={refreshing}
+      style={({ pressed }) => [styles.refresh, (pressed || refreshing) && { opacity: 0.6 }]}
+    >
+      {refreshing ? <ActivityIndicator size="small" color={colors.primary} /> : <Ionicons name="refresh" size={20} color={colors.primary} />}
+      <Text style={styles.refreshText}>Refresh</Text>
     </Pressable>
   );
 }
@@ -137,29 +154,41 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 48,
+    minHeight: TAP_TARGET,
   },
   buttonSecondary: { backgroundColor: colors.primarySoft },
   buttonDanger: { backgroundColor: colors.danger },
   buttonContent: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  buttonText: { color: '#fff', fontWeight: '700', fontSize: 16 },
-  label: { fontWeight: '600', color: colors.text, fontSize: 14 },
-  hint: { color: colors.textMuted, fontSize: 12 },
+  refresh: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    minHeight: 44,
+    paddingHorizontal: spacing.md,
+    borderRadius: radius.pill,
+    backgroundColor: colors.primarySoft,
+    alignSelf: 'flex-start',
+  },
+  refreshText: { color: colors.primary, fontWeight: '700', fontSize: 17 },
+  buttonText: { color: '#fff', fontWeight: '700', fontSize: 18 },
+  label: { fontWeight: '600', color: colors.text, fontSize: 17 },
+  hint: { color: colors.textMuted, fontSize: 15 },
   input: {
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: radius.md,
     paddingHorizontal: spacing.md,
-    paddingVertical: 12,
-    fontSize: 16,
+    paddingVertical: 14,
+    minHeight: TAP_TARGET,
+    fontSize: 18,
     color: colors.text,
   },
   inputMultiline: { minHeight: 110, textAlignVertical: 'top' },
   avatar: { backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center' },
   avatarText: { color: colors.primaryDark, fontWeight: '700' },
-  tag: { borderRadius: radius.pill, paddingHorizontal: 10, paddingVertical: 5, alignSelf: 'flex-start' },
-  tagText: { fontSize: 13, fontWeight: '600' },
+  tag: { borderRadius: radius.pill, paddingHorizontal: 12, paddingVertical: 6, alignSelf: 'flex-start' },
+  tagText: { fontSize: 16, fontWeight: '600' },
   card: {
     backgroundColor: colors.surface,
     borderRadius: radius.lg,
@@ -169,7 +198,7 @@ const styles = StyleSheet.create({
   },
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.xl },
   empty: { alignItems: 'center', paddingVertical: 48, paddingHorizontal: spacing.xl, gap: spacing.sm },
-  emptyTitle: { fontSize: 17, fontWeight: '700', color: colors.text, textAlign: 'center' },
-  emptyMessage: { color: colors.textMuted, textAlign: 'center', lineHeight: 20 },
-  error: { color: colors.danger, fontWeight: '500' },
+  emptyTitle: { fontSize: 19, fontWeight: '700', color: colors.text, textAlign: 'center' },
+  emptyMessage: { color: colors.textMuted, fontSize: 17, textAlign: 'center', lineHeight: 24 },
+  error: { color: colors.danger, fontWeight: '600', fontSize: 17 },
 });

@@ -19,14 +19,16 @@ export default function TabsLayout() {
       screenOptions={{
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
-        tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border },
+        tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border, height: 72, paddingTop: 6 },
+        tabBarLabelStyle: { fontSize: 14, fontWeight: '600' },
+        tabBarIconStyle: { marginBottom: 2 },
         headerStyle: { backgroundColor: colors.surface },
         headerTitleStyle: { color: colors.text, fontWeight: '700' },
         sceneStyle: { backgroundColor: colors.background },
       }}
     >
-      <Tabs.Screen name="index" options={{ title: 'Explore', headerShown: false, tabBarIcon: tabIcon('compass-outline', 'compass') }} />
-      <Tabs.Screen name="post" options={{ title: 'New Listing', tabBarLabel: 'Post', tabBarIcon: tabIcon('add-circle-outline', 'add-circle') }} />
+      <Tabs.Screen name="index" options={{ title: 'Home', headerShown: false, tabBarIcon: tabIcon('home-outline', 'home') }} />
+      <Tabs.Screen name="post" options={{ title: 'Ask or Offer', tabBarLabel: 'Post', tabBarIcon: tabIcon('add-circle-outline', 'add-circle') }} />
       <Tabs.Screen name="messages" options={{ title: 'Messages', tabBarIcon: tabIcon('chatbubbles-outline', 'chatbubbles') }} />
       <Tabs.Screen name="profile" options={{ title: 'My Profile', tabBarLabel: 'Profile', tabBarIcon: tabIcon('person-circle-outline', 'person-circle') }} />
     </Tabs>
