@@ -23,6 +23,14 @@ const FAQ: { q: string; a: string }[] = [
     a: 'You and your neighbor agree on a price in your messages and pay each other directly, for example with cash. EasyHand does not handle money or charge any fees.',
   },
   {
+    q: 'I forgot my password.',
+    a: 'On the log in screen, tap “Forgot your password?” and enter your email. We will email you a link to choose a new one. If you don’t see it, check your spam or junk folder.',
+  },
+  {
+    q: 'How will I know when someone messages me?',
+    a: 'We send you an email when a neighbor messages you. You can turn these emails off on your Profile: tap “Edit profile” and untick “Email me when I get a message”.',
+  },
+  {
     q: 'Does EasyHand check the people who sign up?',
     a: 'No. EasyHand connects neighbors but does not employ, screen or background-check anyone. Please use the safety tips below and trust your instincts.',
   },

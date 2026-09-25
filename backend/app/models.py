@@ -4,6 +4,7 @@ from typing import Any
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
+from .config import get_settings
 from .utils import as_utc
 
 MAX_SKILLS = 20
@@ -46,11 +47,28 @@ class RegisterRequest(BaseModel):
     password: str = Field(min_length=8, max_length=128)
     name: str = Field(min_length=1, max_length=80)
     neighborhood: str = Field(default="", max_length=80)
+    accepted_terms: bool
+
+    @field_validator("accepted_terms")
+    @classmethod
+    def must_accept_terms(cls, v: bool) -> bool:
+        if not v:
+            raise ValueError("You must be 18 or older and agree to the Terms to join")
+        return v
 
 
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
+
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str = Field(min_length=10, max_length=200)
+    password: str = Field(min_length=8, max_length=128)
 
 
 # ---------- Users ----------
@@ -61,6 +79,7 @@ class ProfileUpdate(BaseModel):
     neighborhood: str | None = Field(default=None, max_length=80)
     bio: str | None = Field(default=None, max_length=1000)
     skills: list[str] | None = None
+    email_notifications: bool | None = None
 
     @field_validator("skills")
     @classmethod
@@ -90,10 +109,19 @@ class PublicUser(BaseModel):
 
 class PrivateUser(PublicUser):
     email: EmailStr
+    is_admin: bool = False
+    blocked_ids: list[str] = []
+    email_notifications: bool = True
 
     @classmethod
     def from_doc(cls, doc: dict[str, Any]) -> "PrivateUser":
-        return cls(**PublicUser.from_doc(doc).model_dump(), email=doc["email"])
+        return cls(
+            **PublicUser.from_doc(doc).model_dump(),
+            email=doc["email"],
+            is_admin=get_settings().is_admin(doc["email"]),
+            blocked_ids=[str(b) for b in doc.get("blocked_ids", [])],
+            email_notifications=doc.get("email_notifications", True),
+        )
 
 
 class AuthResponse(BaseModel):
@@ -222,3 +250,56 @@ class UploadSignature(BaseModel):
     folder: str
     signature: str
     upload_url: str
+
+
+# ---------- Reports & moderation ----------
+
+
+class ReportTarget(str, Enum):
+    post = "post"
+    user = "user"
+
+
+class ReportReason(str, Enum):
+    scam = "scam"
+    unsafe = "unsafe"
+    offensive = "offensive"
+    spam = "spam"
+    other = "other"
+
+
+class ReportStatus(str, Enum):
+    open = "open"
+    resolved = "resolved"
+
+
+class ReportCreate(BaseModel):
+    target_type: ReportTarget
+    target_id: str
+    reason: ReportReason
+    details: str = Field(default="", max_length=1000)
+
+
+class ReportCreated(BaseModel):
+    id: str
+
+
+class AdminReport(BaseModel):
+    id: str
+    target_type: ReportTarget
+    target_id: str
+    target_label: str  # listing title or person's name, for display
+    target_hidden: bool  # listing hidden, or person banned
+    reason: ReportReason
+    details: str
+    reporter: AuthorSummary | None
+    status: ReportStatus
+    created_at: datetime
+
+
+class HiddenUpdate(BaseModel):
+    hidden: bool
+
+
+class BannedUpdate(BaseModel):
+    banned: bool

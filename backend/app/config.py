@@ -21,6 +21,23 @@ class Settings(BaseSettings):
     # Comma-separated list of allowed origins, or "*".
     cors_origins: str = "*"
 
+    # Comma-separated emails of people who can moderate reports, hide listings and ban accounts.
+    admin_emails: str = ""
+
+    # Set to false to turn off per-IP rate limits on login/sign-up (e.g. for load testing).
+    rate_limit_enabled: bool = True
+
+    # Public web address of the app, used for links in emails (no trailing slash).
+    app_url: str = "http://localhost:8081"
+
+    # Email via Resend (https://resend.com). Without an API key, emails are logged instead of sent.
+    resend_api_key: str | None = None
+    email_from: str = "EasyHand <onboarding@resend.dev>"
+
+    # Error tracking via Sentry (https://sentry.io). Off unless a DSN is set.
+    sentry_dsn: str | None = None
+    environment: str = "development"
+
     cloudinary_cloud_name: str | None = None
     cloudinary_api_key: str | None = None
     cloudinary_api_secret: str | None = None
@@ -29,6 +46,13 @@ class Settings(BaseSettings):
     @property
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+
+    @property
+    def admin_email_set(self) -> set[str]:
+        return {e.strip().lower() for e in self.admin_emails.split(",") if e.strip()}
+
+    def is_admin(self, email: str) -> bool:
+        return email.lower() in self.admin_email_set
 
     @property
     def cloudinary_enabled(self) -> bool:

@@ -1,7 +1,15 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
-import { api, ApiError, setAuthToken, setUnauthorizedHandler, type PrivateUser, type ProfileUpdate } from './api';
+import {
+  api,
+  ApiError,
+  setAuthToken,
+  setUnauthorizedHandler,
+  type AuthResponse,
+  type PrivateUser,
+  type ProfileUpdate,
+} from './api';
 
 const TOKEN_KEY = 'easyhand.token';
 
@@ -9,9 +17,13 @@ interface AuthContextValue {
   user: PrivateUser | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (data: { email: string; password: string; name: string; neighborhood: string }) => Promise<void>;
+  signUp: (data: { email: string; password: string; name: string; neighborhood: string; accepted_terms: boolean }) => Promise<void>;
   signOut: () => Promise<void>;
+  /** Sign in with a token the server already issued (e.g. after resetting a password). */
+  completeAuth: (res: AuthResponse) => Promise<void>;
   updateProfile: (data: ProfileUpdate) => Promise<void>;
+  /** Replace the cached user after an API call that returns the updated account (e.g. block/unblock). */
+  setUser: (user: PrivateUser) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -46,8 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => setUnauthorizedHandler(null);
   }, [signOut]);
 
-  const handleAuth = useCallback(async (promise: ReturnType<typeof api.login>) => {
-    const { access_token, user: me } = await promise;
+  const completeAuth = useCallback(async ({ access_token, user: me }: AuthResponse) => {
     setAuthToken(access_token);
     await AsyncStorage.setItem(TOKEN_KEY, access_token).catch(() => {});
     setUser(me);
@@ -57,12 +68,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () => ({
       user,
       loading,
-      signIn: (email, password) => handleAuth(api.login(email, password)),
-      signUp: (data) => handleAuth(api.register(data)),
+      signIn: async (email, password) => completeAuth(await api.login(email, password)),
+      signUp: async (data) => completeAuth(await api.register(data)),
       signOut,
+      completeAuth,
       updateProfile: async (data) => setUser(await api.updateProfile(data)),
+      setUser,
     }),
-    [user, loading, handleAuth, signOut],
+    [user, loading, completeAuth, signOut],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

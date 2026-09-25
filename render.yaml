@@ -2,6 +2,9 @@ services:
   - type: web
     name: easyhand-api
     runtime: python
+    # Starter ($7/month) stays awake. "free" works too, but sleeps after 15 idle minutes and
+    # the next visitor waits about a minute. See docs/LAUNCH_CHECKLIST.md.
+    plan: starter
     rootDir: backend
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
@@ -17,6 +20,18 @@ services:
         generateValue: true
       - key: CORS_ORIGINS
         sync: false
+      - key: ADMIN_EMAILS
+        sync: false
+      - key: APP_URL
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: SENTRY_DSN
+        sync: false
+      - key: ENVIRONMENT
+        value: production
       - key: CLOUDINARY_CLOUD_NAME
         sync: false
       - key: CLOUDINARY_API_KEY

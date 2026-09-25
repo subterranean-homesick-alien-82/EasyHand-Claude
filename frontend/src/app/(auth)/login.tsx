@@ -29,6 +29,9 @@ export default function LoginScreen() {
     <AuthScreen subtitle="Welcome back">
       <Field label="Email" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" autoComplete="email" />
       <Field label="Password" value={password} onChangeText={setPassword} secureTextEntry autoComplete="password" onSubmitEditing={submit} />
+      <Link href="/forgot" style={{ color: colors.primary, fontWeight: '700', fontSize: 17, paddingVertical: 4 }}>
+        Forgot your password?
+      </Link>
       <ErrorText message={error} />
       <Button title="Log in" onPress={submit} loading={busy} disabled={!email || !password} />
       <Text style={{ textAlign: 'center', color: colors.textMuted, fontSize: 17, lineHeight: 26 }}>

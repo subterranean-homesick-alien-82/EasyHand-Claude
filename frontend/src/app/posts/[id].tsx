@@ -3,6 +3,7 @@ import { Link, router, Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, Alert, Image, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { ReportButton } from '@/components/ReportButton';
 import { Avatar, Button, Card, Centered, ErrorText, Tag } from '@/components/ui';
 import { api, type PostStatus } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
@@ -115,16 +116,19 @@ export default function PostDetailScreen() {
           <Button title="Delete listing" variant="danger" loading={busy === 'delete'} onPress={remove} />
         </View>
       ) : post.author ? (
-        <Button
-          title={`Message ${post.author.name.split(' ')[0]}`}
-          icon={<Ionicons name="chatbubble-ellipses-outline" size={18} color="#fff" />}
-          onPress={() =>
-            router.push({
-              pathname: '/chat/[userId]',
-              params: { userId: post.author_id, name: post.author!.name, postId: post.id, postTitle: post.title },
-            })
-          }
-        />
+        <View style={{ gap: spacing.sm }}>
+          <Button
+            title={`Message ${post.author.name.split(' ')[0]}`}
+            icon={<Ionicons name="chatbubble-ellipses-outline" size={18} color="#fff" />}
+            onPress={() =>
+              router.push({
+                pathname: '/chat/[userId]',
+                params: { userId: post.author_id, name: post.author!.name, postId: post.id, postTitle: post.title },
+              })
+            }
+          />
+          <ReportButton targetType="post" targetId={post.id} label="Report this listing" />
+        </View>
       ) : null}
     </ScrollView>
   );

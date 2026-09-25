@@ -75,6 +75,22 @@ export function RefreshButton({ onPress, refreshing }: { onPress: () => void; re
   );
 }
 
+export function Checkbox({ checked, onChange, children }: { checked: boolean; onChange: (v: boolean) => void; children: ReactNode }) {
+  return (
+    <Pressable
+      accessibilityRole="checkbox"
+      accessibilityState={{ checked }}
+      onPress={() => onChange(!checked)}
+      style={styles.checkboxRow}
+    >
+      <View style={[styles.checkbox, checked && styles.checkboxChecked]}>
+        {checked ? <Ionicons name="checkmark" size={22} color="#fff" /> : null}
+      </View>
+      <View style={{ flex: 1 }}>{children}</View>
+    </Pressable>
+  );
+}
+
 export function Field({ label, hint, ...props }: TextInputProps & { label: string; hint?: string }) {
   return (
     <View style={{ gap: spacing.xs }}>
@@ -159,6 +175,18 @@ const styles = StyleSheet.create({
   buttonSecondary: { backgroundColor: colors.primarySoft },
   buttonDanger: { backgroundColor: colors.danger },
   buttonContent: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  checkboxRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, minHeight: TAP_TARGET },
+  checkbox: {
+    width: 32,
+    height: 32,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: colors.textMuted,
+    backgroundColor: colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkboxChecked: { backgroundColor: colors.primary, borderColor: colors.primary },
   refresh: {
     flexDirection: 'row',
     alignItems: 'center',
