@@ -117,6 +117,11 @@ const DEFAULT_API_URL = Platform.OS === 'android' ? 'http://10.0.2.2:8000' : 'ht
 
 export const API_URL = (process.env.EXPO_PUBLIC_API_URL || DEFAULT_API_URL).replace(/\/+$/, '');
 
+if (Platform.OS === 'web' && typeof window !== 'undefined') {
+  // Lets the live-site smoke test (e2e/smoke.js) see which backend this build talks to.
+  (window as unknown as { __EASYHAND_API_URL__?: string }).__EASYHAND_API_URL__ = API_URL;
+}
+
 export class ApiError extends Error {
   constructor(
     public status: number,
@@ -189,10 +194,15 @@ async function request<T>(method: string, path: string, body?: unknown, query?: 
   }
 
   if (res.status === 204) return undefined as T;
-  const data = await res.json().catch(() => null);
-  if (!res.ok) {
+  // The EasyHand API always answers in JSON. Anything else (e.g. a web page) means the request
+  // went to the wrong server, usually because EXPO_PUBLIC_API_URL is wrong.
+  const isJson = (res.headers.get('content-type') ?? '').includes('application/json');
+  const data = isJson ? await res.json().catch(() => null) : null;
+  if (!res.ok || data === null) {
     if (res.status === 401 && authToken) onUnauthorized?.();
-    throw new ApiError(res.status, errorMessage(data, 'Something went wrong on our end. Please try again in a moment.'));
+    // The error number helps whoever is fixing the problem; members can ignore it.
+    const code = res.ok ? 'unexpected reply' : `error ${res.status}`;
+    throw new ApiError(res.status, errorMessage(data, `Something went wrong on our end (${code}). Please try again in a moment.`));
   }
   return data as T;
 }

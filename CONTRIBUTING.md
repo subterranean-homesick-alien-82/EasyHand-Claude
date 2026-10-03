@@ -85,6 +85,6 @@ icon-only buttons. If you're unsure, ask someone non-technical to try it.
 
 - **Moderation:** people in `ADMIN_EMAILS` see a Moderation screen on their Profile tab.
 - **Logs:** Render → the API service → *Logs*. Crashes also go to Sentry if `SENTRY_DSN` is set.
-- **Is it up?** `cd e2e && WEB_URL=… API_URL=… npm run smoke` (read-only).
+- **Is it up?** `cd e2e && WEB_URL=… npm run smoke` (read-only; reads the backend address from the live site).
 - **Deploys:** pushing to `main` redeploys both Render and Vercel automatically once they're connected
   (see `docs/LAUNCH_CHECKLIST.md`).

@@ -106,6 +106,10 @@ EasyHand is set up not to send members' personal details to Sentry.
 
 5. **Deploy.** Copy the address Vercel gives you 📝, e.g. `https://easyhand-claude.vercel.app`.
 
+> **Type the API URL by hand**: just `https://` plus the address, with no brackets, quotes, spaces or `/` at
+> the end. Pasting from a chat or document can add hidden extras. If the value isn't a proper address,
+> the Vercel build stops and its log explains what's wrong.
+>
 > These two values are baked into the website when it's built. If you change them later,
 > redeploy in Vercel (Deployments → ⋯ → *Redeploy*).
 
@@ -123,11 +127,19 @@ On your computer, from the `e2e/` folder (one time: `npm install && npx playwrig
 WEB_URL=https://yourdomain.com API_URL=https://easyhand-api.onrender.com npm run smoke
 ```
 
-Every line should say **PASS**. This test only looks; it doesn't create anything. If a line fails:
+Every line should say **PASS**. This test only looks; it doesn't create anything. It reads the backend
+address straight from your live website, so it checks what members actually get. `API_URL` is optional;
+include it to also confirm the site uses the backend you expect. If a line fails:
 
-- **API is up** fails: check the Render deploy log (Render → your service → *Logs*).
-- **CORS** fails: `CORS_ORIGINS` on Render doesn't exactly match the website address (check `https://`
-  and no trailing `/`), or `EXPO_PUBLIC_API_URL` on Vercel is wrong (redeploy after fixing).
+- **Website has a proper backend address** or **uses the backend you expected** fails: fix
+  `EXPO_PUBLIC_API_URL` in Vercel (type it by hand), then redeploy.
+- **Backend is up** fails: check the Render deploy log (Render → your service → *Logs*).
+- **Website is allowed to call the backend** fails: `CORS_ORIGINS` on Render doesn't exactly match the
+  website address (check `https://`, `www.`, and no trailing `/`).
+
+**Troubleshooting in the browser:** if logging in shows an error, open the site on a computer, press **F12**,
+choose the **Network** tab and try again. Click the red `login` line and look at **Request URL**: it should
+start with your Render address. The error message also shows a number (e.g. "error 405") that helps pin it down.
 
 Then try it by hand **on a real phone**, ideally with someone who isn't technical:
 
