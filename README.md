@@ -157,8 +157,11 @@ plus costs and a pre-launch test list.
 Once it's live, check it with the read-only smoke test (creates nothing):
 
 ```bash
-cd e2e && WEB_URL=https://yourdomain.com API_URL=https://your-api.onrender.com npm run smoke
+cd e2e && WEB_URL=https://yourdomain.com npm run smoke   # add API_URL=https://… to also check the site uses that backend
 ```
+
+The web build (`npm run build:web`, also used by Vercel) first runs `scripts/check-env.js`, which stops the
+build if `EXPO_PUBLIC_API_URL` isn't a plain `https://` address.
 
 To put a few clearly-labelled example listings on an empty board: `python -m scripts.seed_examples team@yourdomain.com`
 (from `backend/`, with `MONGO_URL` set).
