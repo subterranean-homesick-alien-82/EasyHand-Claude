@@ -30,7 +30,6 @@ function RootNavigator() {
     >
       <Stack.Protected guard={!!user}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="posts/[id]" options={{ title: 'Listing' }} />
         <Stack.Screen name="chat/[userId]" options={{ title: 'Chat' }} />
         <Stack.Screen name="users/[id]" options={{ title: 'Neighbor' }} />
         <Stack.Screen name="admin" options={{ title: 'Moderation' }} />
@@ -38,6 +37,9 @@ function RootNavigator() {
       <Stack.Protected guard={!user}>
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
       </Stack.Protected>
+      {/* Visitors can look at listings before making an account. */}
+      <Stack.Screen name="browse" options={{ title: 'Look around' }} />
+      <Stack.Screen name="posts/[id]" options={{ title: 'Listing' }} />
       <Stack.Screen name="help" options={{ title: 'Help & Safety' }} />
       <Stack.Screen name="reset-password" options={{ title: 'Choose a new password' }} />
       <Stack.Screen name="terms" options={{ title: 'Terms of Service' }} />
