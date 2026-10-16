@@ -29,6 +29,15 @@ const TITLE = `Front yard needs mowing this weekend #${stamp % 100000}`;
   // 1. Maria registers and posts a lawncare listing
   const maria = await newUser();
   await maria.goto(BASE);
+  // First visit: the animated tour plays over the welcome screen
+  await maria.getByText('Welcome to EasyHand!').waitFor();
+  await maria.waitForTimeout(1800);
+  await shot(maria, '00-tour-1');
+  await maria.getByRole('button', { name: 'Next' }).click();
+  await maria.waitForTimeout(1800);
+  await shot(maria, '00-tour-2');
+  await maria.getByRole('button', { name: 'Skip the tour' }).click();
+  await maria.getByText('Welcome to EasyHand!').waitFor({ state: 'detached' });
   await maria.getByText('How it works').waitFor();
   await shot(maria, '00-welcome');
   await maria.getByText('Questions? Read Help & Safety').click();
@@ -36,6 +45,8 @@ const TITLE = `Front yard needs mowing this weekend #${stamp % 100000}`;
   await shot(maria, '00-help');
   await maria.goBack();
   await maria.getByText('How it works').waitFor();
+  // The tour only plays once per browser
+  if (await maria.getByText('Welcome to EasyHand!').isVisible()) throw new Error('Tour played a second time');
   await maria.getByRole('button', { name: "Join EasyHand. It's free" }).click();
   await maria.getByLabel('Your name').fill('Maria Lopez');
   await maria.getByLabel('Neighborhood').fill('Midtown');
