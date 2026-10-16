@@ -66,7 +66,7 @@ async def list_posts(
         pattern = {"$regex": re.escape(q.strip()), "$options": "i"}
         query["$or"] = [{"title": pattern}, {"description": pattern}]
 
-    cursor = db.posts.find(query).sort("created_at", DESCENDING).skip(skip).limit(limit)
+    cursor = db.posts.find(query).sort([("created_at", DESCENDING), ("_id", DESCENDING)]).skip(skip).limit(limit)
     docs = [doc async for doc in cursor]
     authors = await _authors_by_id(db, {d["author_id"] for d in docs})
     return [Post.from_doc(d, authors.get(d["author_id"])) for d in docs]
