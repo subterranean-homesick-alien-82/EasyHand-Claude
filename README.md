@@ -88,7 +88,8 @@ Indexes are created on startup (`app/db.py`).
 frontend/src/
   app/
     _layout.tsx            auth gate (Stack.Protected) + root stack
-    (auth)/welcome.tsx     Signed-out landing: "How it works" in three steps
+    (auth)/welcome.tsx     Signed-out landing: "How it works" in three steps; plays the animated
+                           WelcomeTour on a first visit (remembered in localStorage)
     (auth)/login.tsx, register.tsx, forgot.tsx
     reset-password.tsx     Opened from the reset email; works signed in or out
     (tabs)/index.tsx       Home feed: search, category pills, needs/offers toggle
@@ -135,7 +136,7 @@ cd backend && pytest -q                            # API tests incl. the end-to-
 cd frontend && npm run typecheck && npm run build:web
 ```
 
-Browser test of the full loop (register → post a lawncare listing → second user edits profile,
+Browser test of the full loop (first-visit tour → register → post a lawncare listing → second user edits profile,
 filters the feed, messages the author → author replies from the inbox → the listing is reported
 and a moderator hides it → the author resets a forgotten password):
 
