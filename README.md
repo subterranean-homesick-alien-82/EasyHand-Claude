@@ -96,7 +96,8 @@ frontend/src/
     (tabs)/post.tsx        "Ask or Offer" form (with optional photo)
     (tabs)/messages.tsx    Inbox
     (tabs)/profile.tsx     My profile, skills editor, my listings
-    posts/[id].tsx         Listing detail; message author or manage your own listing
+    browse.tsx             "Look around": open listings for visitors without an account
+    posts/[id].tsx         Listing detail; message author or manage your own listing (visible signed out too)
     chat/[userId].tsx      Direct chat (polls every 4s), optionally tied to a listing
     users/[id].tsx         Public neighbor profile
     help.tsx               Help & Safety: safety tips and FAQ (visible signed in or out)
@@ -136,7 +137,7 @@ cd backend && pytest -q                            # API tests incl. the end-to-
 cd frontend && npm run typecheck && npm run build:web
 ```
 
-Browser test of the full loop (first-visit tour → register → post a lawncare listing → second user edits profile,
+Browser test of the full loop (first-visit tour → a visitor browses without an account → register → post a lawncare listing → second user edits profile,
 filters the feed, messages the author → author replies from the inbox → the listing is reported
 and a moderator hides it → the author resets a forgotten password):
 

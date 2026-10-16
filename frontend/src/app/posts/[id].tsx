@@ -84,7 +84,16 @@ export default function PostDetailScreen() {
 
       <Text style={styles.description}>{post.description}</Text>
 
-      {post.author ? (
+      {post.author && !user ? (
+        // Visitors who aren't signed in see who posted it, but neighbor profiles are for members.
+        <Card style={styles.authorCard}>
+          <Avatar name={post.author.name} size={44} />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.authorName}>{post.author.name}</Text>
+            {post.author.neighborhood ? <Text style={styles.authorMeta}>{post.author.neighborhood}</Text> : null}
+          </View>
+        </Card>
+      ) : post.author ? (
         <Link href={`/users/${post.author.id}`} asChild>
           <Pressable>
             <Card style={styles.authorCard}>
@@ -101,7 +110,15 @@ export default function PostDetailScreen() {
 
       <ErrorText message={actionError} />
 
-      {isMine ? (
+      {!user ? (
+        <View style={styles.joinBox}>
+          <Text style={styles.joinText}>
+            {post.author ? `Want to message ${post.author.name.split(' ')[0]}? ` : ''}Join EasyHand to reply to neighbors. It's free.
+          </Text>
+          <Button title="Join EasyHand. It's free" onPress={() => router.push('/register')} />
+          <Button title="I already have an account" variant="secondary" onPress={() => router.push('/login')} />
+        </View>
+      ) : isMine ? (
         <View style={{ gap: spacing.sm }}>
           <Text style={styles.sectionLabel}>Manage your listing</Text>
           {post.status === 'active' ? (
@@ -153,5 +170,13 @@ const styles = StyleSheet.create({
   authorCard: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, padding: spacing.md },
   authorName: { fontWeight: '700', fontSize: 18, color: colors.text },
   authorMeta: { color: colors.textMuted, fontSize: 16 },
+  joinBox: {
+    gap: spacing.sm,
+    backgroundColor: colors.primarySoft,
+    borderRadius: radius.lg,
+    padding: spacing.lg,
+    marginTop: spacing.sm,
+  },
+  joinText: { fontSize: 18, lineHeight: 25, color: colors.text, fontWeight: '600' },
   sectionLabel: { fontWeight: '700', color: colors.textMuted, fontSize: 17, marginTop: spacing.sm },
 });

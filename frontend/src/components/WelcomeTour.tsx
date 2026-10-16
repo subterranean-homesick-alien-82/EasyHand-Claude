@@ -33,7 +33,7 @@ const SCENES: Scene[] = [
   },
   {
     title: 'Job done. Everyone smiles!',
-    text: "That's all there is to it. Joining is free.",
+    text: "That's all there is to it. Joining is free, or look around at open jobs first.",
     Stage: HappyStage,
   },
 ];
@@ -42,7 +42,7 @@ const SCENES: Scene[] = [
  * A short animated walkthrough shown over the welcome screen on someone's first visit.
  * Plays by itself, but every step has big Back / Next buttons and it can be skipped at any time.
  */
-export function WelcomeTour({ onClose, onJoin }: { onClose: () => void; onJoin: () => void }) {
+export function WelcomeTour({ onClose, onJoin, onBrowse }: { onClose: () => void; onJoin: () => void; onBrowse: () => void }) {
   const [index, setIndex] = useState(0);
   const [autoplay, setAutoplay] = useState(true);
   const [still, setStill] = useState(false);
@@ -119,7 +119,7 @@ export function WelcomeTour({ onClose, onJoin }: { onClose: () => void; onJoin: 
         {last ? (
           <View style={{ gap: spacing.md }}>
             <Button title="Join EasyHand. It's free" onPress={onJoin} />
-            <Button title="Look around first" variant="secondary" onPress={onClose} />
+            <Button title="Look around first" variant="secondary" onPress={onBrowse} />
           </View>
         ) : (
           <View style={styles.navRow}>

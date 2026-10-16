@@ -86,6 +86,7 @@ export default function WelcomeScreen() {
 
         <View style={{ gap: spacing.md }}>
           <Button title="Join EasyHand. It's free" onPress={() => router.push('/register')} />
+          <Button title="Look around first" variant="secondary" onPress={() => router.push('/browse')} />
           <Button title="I already have an account" variant="secondary" onPress={() => router.push('/login')} />
           <Link href="/help" style={styles.helpLink}>
             Questions? Read Help & Safety
@@ -98,6 +99,10 @@ export default function WelcomeScreen() {
           onJoin={() => {
             setShowTour(false);
             router.push('/register');
+          }}
+          onBrowse={() => {
+            setShowTour(false);
+            router.push('/browse');
           }}
         />
       ) : null}

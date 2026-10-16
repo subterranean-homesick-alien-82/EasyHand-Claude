@@ -67,6 +67,19 @@ const TITLE = `Front yard needs mowing this weekend #${stamp % 100000}`;
   const postUrl = maria.url();
   await shot(maria, '03-post-detail-owner');
 
+  // 1b. A visitor without an account looks around and opens the listing
+  const guest = await newUser();
+  await guest.goto(BASE);
+  await guest.getByRole('button', { name: 'Skip the tour' }).click();
+  await guest.getByRole('button', { name: 'Look around first' }).click();
+  await guest.getByText('Open jobs').waitFor();
+  await guest.getByText(TITLE).click();
+  await guest.getByText('Join EasyHand to reply to neighbors', { exact: false }).waitFor();
+  await guest.getByText('$30 + lemonade').filter({ visible: true }).waitFor();
+  await shot(guest, '03b-guest-listing');
+  await guest.getByRole('button', { name: "Join EasyHand. It's free" }).click();
+  await guest.getByLabel('Your name').waitFor();
+
   // 2. Jay registers, fills in profile, finds the listing and messages Maria
   const jay = await newUser();
   await jay.goto(`${BASE}/register`);
